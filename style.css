@@ -1,0 +1,317 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+h1, h3, p {
+    text-align: center;
+    color: #333;
+}
+
+.landing-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+.utilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.utility-card {
+    background-color: #222;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+}
+
+.utility-card:hover {
+    transform: translateY(-5px);
+}
+
+.utility-card h3 {
+    color: #ff9500;
+    margin-bottom: 15px;
+}
+
+.utility-card p {
+    color: #ccc;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.utility-link {
+    display: inline-block;
+    background-color: #ff9500;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.utility-link:hover {
+    background-color: #e68400;
+}
+
+.calculator {
+    background-color: #222;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+.inputGroup {
+    margin-bottom: 15px;
+}
+
+.inputGroup label {
+    display: block;
+    color: white;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.inputGroup input {
+    width: 100%;
+    height: 40px;
+    font-size: 16px;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+    box-sizing: border-box;
+}
+
+.inputGroup input:focus {
+    outline: 2px solid #ff9500;
+    background-color: #444;
+}
+
+.inputGroup input::placeholder {
+    color: #999;
+}
+
+.optional {
+    color: #999;
+    font-size: 12px;
+}
+
+.calculateButton {
+    width: 100%;
+    height: 50px;
+    font-size: 18px;
+    background-color: #ff9500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 20px 0 15px 0;
+    transition: background-color 0.2s;
+}
+
+.calculateButton:hover {
+    background-color: #e68400;
+}
+
+.calculateButton:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}
+
+.result {
+    background-color: #000;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 18px;
+    text-align: center;
+    min-height: 20px;
+}
+
+.clearButton {
+    width: 100%;
+    height: 40px;
+    font-size: 16px;
+    background-color: #a6a6a6;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.clearButton:hover {
+    background-color: #999;
+}
+
+.error {
+    color: #ff6b6b;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #ff9500;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+.switch-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.switch-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.switch-group-label {
+    color: white;
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.navigation {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.navigation a {
+    color: #ff9500;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navigation a:hover {
+    text-decoration: underline;
+}
+
+.inputColumns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.columnGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.pathGrid {
+    display: grid;
+    grid:
+        "inputDiameter inputLength btnClear btnNext"  
+        "preview       preview     preview  preview"  120px / 1fr 1fr 40px 40px;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+    .inputColumns {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+
+.coordinateInputRow {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 15px;
+}
+
+.coordinateButton {
+    height: 40px;
+    font-size: 14px;
+    background-color: #ff9500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 19px;
+}
+
+.coordinateButton:hover {
+    background-color: #e68400;
+}
+
+@media (max-width: 600px) {
+    .coordinateInputRow {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .coordinateButton {
+        aspect-ratio: auto;
+        height: 50px;
+    }
+}
