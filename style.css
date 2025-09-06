@@ -263,32 +263,125 @@ input:checked + .slider:before {
     flex-direction: column;
 }
 
-.pathGrid {
+.layout {
     display: grid;
-    grid:
-        "inputDiameter inputLength btnClear btnNext"  
-        "preview       preview     preview  preview"  120px / 1fr 1fr 40px 40px;
-    gap: 10px;
-    margin-bottom: 20px;
+    grid-template-areas: 
+        "coordinateControls coordinateControls"
+        "preview            preview"
+        "mainParametersRow  mainParametersRow"
+        "roughCutControls   roughCutControls"
+        "fineCutControls    fineCutControls"
+        "results            results"
+        ".        CalculateButton";
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-@media (max-width: 600px) {
-    .inputColumns {
+.mainParametersRow {
+    grid-area: mainParametersRow;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 15px;
+}
+
+.cuttingControlsRow {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px 15px;
+    grid-template-areas:
+        "switch-area label1 label2 label3"
+        "switch-area input1 input2 input3";
+}
+
+.cuttingControlsRow .switch-container {
+    grid-area: switch-area;
+    align-self: center;
+    margin-bottom: 0;
+}
+
+.cuttingControlsRow .inputGroup:nth-child(2) {
+    grid-area: label1 / label1 / input1 / input1;
+    margin-bottom: 0;
+}
+
+.cuttingControlsRow .inputGroup:nth-child(3) {
+    grid-area: label2 / label2 / input2 / input2;
+    margin-bottom: 0;
+}
+
+.cuttingControlsRow .inputGroup:nth-child(4) {
+    grid-area: label3 / label3 / input3 / input3;
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .layout {
+        grid-template-areas: 
+            "coordinateControls"
+            "preview"
+            "mainParametersRow"
+            "roughCutControls"
+            "fineCutControls"
+            "results"
+            "ClearButton"
+            "CalculateButton";
+        grid-template-columns: 1fr;
+    }
+    
+    .mainParametersRow {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .cuttingControlsRow {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto auto;
+        gap: 10px;
+        grid-template-areas:
+            "switch-area"
+            "input1"
+            "input2"
+            "input3"
+            ".";
+    }
+    
+    .cuttingControlsRow .switch-container {
+        justify-self: start;
+        align-self: start;
+    }
+}
+
+@media (max-width: 480px) {
+    .mainParametersRow {
         grid-template-columns: 1fr;
         gap: 10px;
     }
 }
 
-
 .coordinateInputRow {
     display: grid;
-    grid-template-columns: 2fr 2fr 1fr;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    grid-template-rows: auto auto;
     gap: 10px;
-    align-items: end;
     margin-bottom: 15px;
+    grid-template-areas:
+        "label1 label2 . ."
+        "input1 input2 clearButton coordinateButton";
 }
 
-.coordinateButton {
+.coordinateInputRow .inputGroup:nth-child(1) {
+    grid-area: label1 / label1 / input1 / input1;
+    margin-bottom: 0;
+}
+
+.coordinateInputRow .inputGroup:nth-child(2) {
+    grid-area: label2 / label2 / input2 / input2;
+    margin-bottom: 0;
+}
+
+.coordinateInputRow .coordinateButton {
+    grid-area: coordinateButton;
     height: 40px;
     font-size: 14px;
     background-color: #ff9500;
@@ -297,21 +390,47 @@ input:checked + .slider:before {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 19px;
+    align-self: end;
 }
 
-.coordinateButton:hover {
+.coordinateInputRow .coordinateButton:hover {
     background-color: #e68400;
+}
+
+.coordinateInputRow .coordinateClearButton {
+    grid-area: clearButton;
+    height: 40px;
+    font-size: 14px;
+    background-color: #a6a6a6;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: end;
+}
+
+.coordinateInputRow .coordinateClearButton:hover {
+    background-color: #999;
 }
 
 @media (max-width: 600px) {
     .coordinateInputRow {
         grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto auto auto;
         gap: 15px;
+        grid-template-areas:
+            "label1"
+            "input1"
+            "label2"
+            "input2"
+            "clearButton"
+            "coordinateButton";
     }
     
-    .coordinateButton {
-        aspect-ratio: auto;
+    .coordinateInputRow .coordinateButton,
+    .coordinateInputRow .coordinateClearButton {
         height: 50px;
+        align-self: stretch;
     }
 }

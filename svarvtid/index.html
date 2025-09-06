@@ -13,74 +13,115 @@
 
     <h1>Svarvtidskalkylator</h1>
 
-    <div class="calculator">
-        <div class="pathGrid">
-            <div class="inputGroup" style="grid-area: inputDiameter;">
-                <label for="coordinateDiameter">Diameter</label>
-                <input type="number" id="coordinateDiameter" step="any" placeholder="Ange diameter">
-            </div>
-
-            <div class="inputGroup" style="grid-area: inputLength;">
-                <label for="coordinateLength">Längd</label>
-                <input type="number" id="coordinateLength" step="any" value="0" placeholder="Ange längd" disabled>
-            </div>
-
-            <button class="coordinateButton" style="grid-area: btnClear;" onclick="clearCoordinateInputs()">⌫</button>
-            <button class="coordinateButton" style="grid-area: btnNext;" onclick="addCoordinate()">+</button>
-
-            <canvas id="pathPreview" style="grid-area: preview; background-color: #000; border-radius: 5px;" width="400" height="120"></canvas>
-        </div>
-
-        <div class="inputColumns">
-            <div class="columnGroup">
+    <div class="calculator layout">
+        <div style="grid-area: coordinateControls;">
+            <div class="coordinateInputRow">
                 <div class="inputGroup">
-                    <label for="outerDiameter">Ytterdiameter</label>
-                    <input type="number" id="outerDiameter" step="any" value="230" placeholder="Ange ytterdiameter">
+                    <label for="coordinateDiameter">Diameter</label>
+                    <input type="number" id="coordinateDiameter" step="any" placeholder="Ange diameter">
                 </div>
 
                 <div class="inputGroup">
-                    <label for="length">Längd</label>
-                    <input type="number" id="length" step="any" value="2000" placeholder="Ange längd">
+                    <label for="coordinateLength">Längd</label>
+                    <input type="number" id="coordinateLength" step="any" value="0" placeholder="Ange längd">
                 </div>
 
-                <div class="inputGroup">
-                    <label for="innerDiameter">Innerdiameter <span class="optional">(valfritt)</span></label>
-                    <input type="number" id="innerDiameter" step="any" placeholder="Ange innerdiameter (valfritt)">
-                </div>
-            </div>
-
-            <div class="columnGroup">
-                <div class="inputGroup">
-                    <label for="feedRate">Matningshastighet</label>
-                    <input type="number" id="feedRate" step="any" value="0.3" placeholder="Ange matningshastighet">
-                </div>
-
-                <div class="inputGroup">
-                    <label for="cutDepth">Skärdjup</label>
-                    <input type="number" id="cutDepth" step="any" value="3" placeholder="Ange skärdjup">
-                </div>
-
-                <div class="inputGroup">
-                    <label for="cuttingSpeed">Vc</label>
-                    <input type="number" id="cuttingSpeed" step="any" value="220" placeholder="Ange skärhastighet">
-                </div>
+                <button class="coordinateClearButton" onclick="clearCoordinatePath()">Rensa</button>
+                <button class="coordinateButton" onclick="addCoordinate()">Lägg till</button>
             </div>
         </div>
 
-        <button class="calculateButton" onclick="performTurningTimeCalculation()">Beräkna</button>
-        
-        <div class="result" id="result">Ange värden och klicka Beräkna</div>
-        
-        <button class="clearButton" onclick="clearTurningCalculatorInputs()">Rensa alla</button>
+        <div style="grid-area: preview;">
+            <canvas id="pathPreview" width="600" height="120" style="border: 1px solid #666; background-color: #111; width: 100%; height: 120px;"></canvas>
+        </div>
+
+        <div style="grid-area: mainParametersRow;" class="mainParametersRow">
+            <div class="inputGroup">
+                <label for="outerDiameter">Ytterdia</label>
+                <input type="number" id="outerDiameter" step="any" value="230" placeholder="Ange ytterdiameter">
+            </div>
+
+            <div class="inputGroup">
+                <label for="length">Längd</label>
+                <input type="number" id="length" step="any" value="2000" placeholder="Ange längd">
+            </div>
+
+            <div class="inputGroup">
+                <label for="innerDiameter">Innerdia</span></label>
+                <input type="number" id="innerDiameter" step="any" placeholder="Ange innerdiameter (valfritt)">
+            </div>
+
+            <div class="inputGroup">
+                <label for="maximumRotationsPerMinute">RPM MAX</label>
+                <input type="number" id="maximumRotationsPerMinute" step="any" value="1000" placeholder="Ange max RPM">
+            </div>
+        </div>
+
+        <div style="grid-area: roughCutControls;" class="cuttingControlsRow">
+            <div class="switch-container">
+                <div class="switch-group">
+                    <div class="switch-group-label">Grov</div>
+                    <label class="switch">
+                        <input type="checkbox" id="enableRoughCutting" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="inputGroup" id="roughFeedRateGroup">
+                <label for="feedRate">Matning</label>
+                <input type="number" id="feedRate" step="any" value="0.3" placeholder="Ange matningshastighet">
+            </div>
+
+            <div class="inputGroup" id="roughCutDepthGroup">
+                <label for="cutDepth">Skärdjup</label>
+                <input type="number" id="cutDepth" step="any" value="3" placeholder="Ange skärdjup">
+            </div>
+
+            <div class="inputGroup" id="roughCuttingSpeedGroup">
+                <label for="cuttingSpeed">Vc</label>
+                <input type="number" id="cuttingSpeed" step="any" value="220" placeholder="Ange skärhastighet">
+            </div>
+        </div>
+
+        <div style="grid-area: fineCutControls;" class="cuttingControlsRow">
+            <div class="switch-container">
+                <div class="switch-group">
+                    <div class="switch-group-label">Fin</div>
+                    <label class="switch">
+                        <input type="checkbox" id="enableFineCutting">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="inputGroup" id="fineFeedRateGroup" style="display: none;">
+                <label for="fineFeedRate">Matning</label>
+                <input type="number" id="fineFeedRate" step="any" value="0.18" placeholder="Ange matningshastighet">
+            </div>
+
+            <div class="inputGroup" id="fineCutDepthGroup" style="display: none;">
+                <label for="fineCutDepth">Skärdjup</label>
+                <input type="number" id="fineCutDepth" step="any" value="1.0" placeholder="Ange skärdjup">
+            </div>
+
+            <div class="inputGroup" id="fineCuttingSpeedGroup" style="display: none;">
+                <label for="fineCuttingSpeed">Vc</label>
+                <input type="number" id="fineCuttingSpeed" step="any" value="280" placeholder="Ange skärhastighet">
+            </div>
+        </div>
+
+        <div style="grid-area: results;">
+            <div id="result" class="result">Ange värden och klicka Beräkna</div>
+        </div>
+
+        <div style="grid-area: CalculateButton;">
+            <button class="calculateButton" onclick="performTurningTimeCalculation()">Beräkna</button>
+        </div>
     </div>
 
     <script>
-        let coordinatesList = [
-            { diameter: 150, length: 0 },
-            { diameter: 150, length: 200 },
-            { diameter: 201, length: 200 },
-            { diameter: 201, length: 2000 }
-        ];
+        let coordinatesList = [];
 
         function updateCoordinateLengthState() {
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
@@ -110,8 +151,8 @@
             context.lineWidth = 1;
             
             context.beginPath();
-            context.moveTo(0, canvas.height / 2);
-            context.lineTo(canvas.width, canvas.height / 2);
+            context.moveTo(0, canvas.height);
+            context.lineTo(canvas.width, canvas.height);
             context.stroke();
             
             context.beginPath();
@@ -123,35 +164,6 @@
                 drawCuttingPasses(context, outerDiameterValue, lengthValue);
                 drawCoordinatePath(context, outerDiameterValue, lengthValue);
             }
-        }
-
-        function clearPreviewCanvas() {
-            const canvas = document.getElementById('pathPreview');
-            const context = canvas.getContext('2d');
-            context.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function clearCoordinateInputs() {
-            document.getElementById('coordinateDiameter').value = '';
-            document.getElementById('coordinateLength').value = '0';
-        }
-
-        function addCoordinate() {
-            const diameterValue = parseFloat(document.getElementById('coordinateDiameter').value);
-            const lengthValue = parseFloat(document.getElementById('coordinateLength').value);
-            const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
-            const maximumLengthValue = parseFloat(document.getElementById('length').value);
-
-            if (isNaN(diameterValue) || isNaN(lengthValue) || isNaN(outerDiameterValue) || isNaN(maximumLengthValue)) {
-                return;
-            }
-
-            if (diameterValue > outerDiameterValue || lengthValue > maximumLengthValue) {
-                return;
-            }
-
-            coordinatesList.push({ diameter: diameterValue, length: lengthValue });
-            drawPreviewBackground();
         }
 
         function drawCuttingPasses(context, outerDiameterValue, lengthValue) {
@@ -166,7 +178,7 @@
             context.lineWidth = 1;
 
             while (currentCutDiameter >= minimumDiameter) {
-                const yPosition = canvas.height / 2 - (currentCutDiameter / outerDiameterValue) * (canvas.height / 2);
+                const yPosition = canvas.height - (currentCutDiameter / outerDiameterValue) * canvas.height;
                 
                 context.beginPath();
                 let lineStarted = false;
@@ -203,6 +215,369 @@
             }
         }
 
+        function drawCoordinatePath(context, outerDiameterValue, lengthValue) {
+            const canvas = document.getElementById('pathPreview');
+            
+            context.strokeStyle = '#ff9500';
+            context.fillStyle = '#ff9500';
+            context.lineWidth = 2;
+            
+            context.beginPath();
+            coordinatesList.forEach((coordinate, index) => {
+                const xPosition = canvas.width - (coordinate.length / lengthValue) * canvas.width;
+                const yPosition = canvas.height - (coordinate.diameter / outerDiameterValue) * canvas.height;
+                
+                if (index === 0) {
+                    context.moveTo(xPosition, yPosition);
+                } else {
+                    context.lineTo(xPosition, yPosition);
+                }
+            });
+            context.stroke();
+            
+            coordinatesList.forEach((coordinate) => {
+                const xPosition = canvas.width - (coordinate.length / lengthValue) * canvas.width;
+                const yPosition = canvas.height - (coordinate.diameter / outerDiameterValue) * canvas.height;
+                
+                context.beginPath();
+                context.arc(xPosition, yPosition, 3, 0, 2 * Math.PI);
+                context.fill();
+            });
+        }
+
+        function updateRoughCuttingInputVisibility() {
+            const roughCuttingEnabled = document.getElementById('enableRoughCutting').checked;
+            const roughFeedRateGroup = document.getElementById('roughFeedRateGroup');
+            const roughCutDepthGroup = document.getElementById('roughCutDepthGroup');
+            const roughCuttingSpeedGroup = document.getElementById('roughCuttingSpeedGroup');
+            
+            roughFeedRateGroup.style.display = roughCuttingEnabled ? 'block' : 'none';
+            roughCutDepthGroup.style.display = roughCuttingEnabled ? 'block' : 'none';
+            roughCuttingSpeedGroup.style.display = roughCuttingEnabled ? 'block' : 'none';
+        }
+
+        function updateFineCuttingInputVisibility() {
+            const fineCuttingEnabled = document.getElementById('enableFineCutting').checked;
+            const fineFeedRateGroup = document.getElementById('fineFeedRateGroup');
+            const fineCutDepthGroup = document.getElementById('fineCutDepthGroup');
+            const fineCuttingSpeedGroup = document.getElementById('fineCuttingSpeedGroup');
+            
+            fineFeedRateGroup.style.display = fineCuttingEnabled ? 'block' : 'none';
+            fineCutDepthGroup.style.display = fineCuttingEnabled ? 'block' : 'none';
+            fineCuttingSpeedGroup.style.display = fineCuttingEnabled ? 'block' : 'none';
+        }
+
+        function getAdjustedCoordinatesForRoughCutting() {
+            const fineCuttingEnabled = document.getElementById('enableFineCutting').checked;
+            
+            if (!fineCuttingEnabled) {
+                return coordinatesList;
+            }
+            
+            const fineCutDepthValue = parseFloat(document.getElementById('fineCutDepth').value);
+            if (isNaN(fineCutDepthValue)) {
+                return coordinatesList;
+            }
+            
+            return coordinatesList.map(coordinate => ({
+                diameter: coordinate.diameter + (fineCutDepthValue * 2),
+                length: coordinate.length
+            }));
+        }
+
+        function getMinimumDiameterAtLengthForCuttingType(targetLength, useRoughCuttingPath = false) {
+            const coordinatesToUse = useRoughCuttingPath ? getAdjustedCoordinatesForRoughCutting() : coordinatesList;
+            
+            if (coordinatesToUse.length < 2) return 0;
+
+            for (let segmentIndex = 1; segmentIndex < coordinatesToUse.length; segmentIndex++) {
+                const previousCoordinate = coordinatesToUse[segmentIndex - 1];
+                const currentCoordinate = coordinatesToUse[segmentIndex];
+                
+                const minimumLength = Math.min(previousCoordinate.length, currentCoordinate.length);
+                const maximumLength = Math.max(previousCoordinate.length, currentCoordinate.length);
+                
+                if (targetLength >= minimumLength && targetLength <= maximumLength) {
+                    const lengthRatio = (targetLength - previousCoordinate.length) / (currentCoordinate.length - previousCoordinate.length);
+                    return previousCoordinate.diameter + lengthRatio * (currentCoordinate.diameter - previousCoordinate.diameter);
+                }
+            }
+
+            if (targetLength < coordinatesToUse[0].length) {
+                return coordinatesToUse[0].diameter;
+            }
+            
+            if (targetLength > coordinatesToUse[coordinatesToUse.length - 1].length) {
+                return coordinatesToUse[coordinatesToUse.length - 1].diameter;
+            }
+
+            return Math.min(...coordinatesToUse.map(coordinate => coordinate.diameter));
+        }
+
+        function calculateCuttableLengthForDiameter(cuttingDiameter, maximumLength, useRoughCuttingPath = false) {
+            let cuttableLength = 0;
+            
+            for (let currentLength = 0; currentLength <= maximumLength; currentLength += 0.1) {
+                const minimumDiameterAtPosition = getMinimumDiameterAtLengthForCuttingType(currentLength, useRoughCuttingPath);
+                
+                if (cuttingDiameter >= minimumDiameterAtPosition) {
+                    cuttableLength = currentLength;
+                } else {
+                    break;
+                }
+            }
+            
+            return cuttableLength;
+        }
+
+        function calculateTurningTime() {
+            if (coordinatesList.length < 2) {
+                return { error: 'Minst två koordinater med olika längdvärden krävs för beräkning' };
+            }
+
+            const roughCuttingEnabled = document.getElementById('enableRoughCutting').checked;
+            const fineCuttingEnabled = document.getElementById('enableFineCutting').checked;
+
+            if (!roughCuttingEnabled && !fineCuttingEnabled) {
+                return { error: 'Minst en typ av bearbetning måste vara aktiverad' };
+            }
+
+            const feedRateValue = parseFloat(document.getElementById('feedRate').value);
+            const cutDepthValue = parseFloat(document.getElementById('cutDepth').value);
+            const cuttingSpeedValue = parseFloat(document.getElementById('cuttingSpeed').value);
+            const fineFeedRateValue = parseFloat(document.getElementById('fineFeedRate').value);
+            const fineCutDepthValue = parseFloat(document.getElementById('fineCutDepth').value);
+            const fineCuttingSpeedValue = parseFloat(document.getElementById('fineCuttingSpeed').value);
+            const maximumRotationsPerMinuteValue = parseFloat(document.getElementById('maximumRotationsPerMinute').value);
+
+            if (roughCuttingEnabled && (isNaN(feedRateValue) || isNaN(cutDepthValue) || isNaN(cuttingSpeedValue))) {
+                return { error: 'Ogiltiga skärdata för grovbearbetning' };
+            }
+
+            if (fineCuttingEnabled && (isNaN(fineFeedRateValue) || isNaN(fineCutDepthValue) || isNaN(fineCuttingSpeedValue))) {
+                return { error: 'Ogiltiga skärdata för finbearbetning' };
+            }
+
+            if (isNaN(maximumRotationsPerMinuteValue)) {
+                return { error: 'Ogiltig varvtalsbegränsning' };
+            }
+
+            const hasLengthVariation = coordinatesList.some((coordinate, index) => 
+                index > 0 && coordinate.length !== coordinatesList[0].length
+            );
+
+            if (!hasLengthVariation) {
+                return { error: 'Koordinater måste ha olika längdvärden' };
+            }
+
+            const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
+            const lengthValue = parseFloat(document.getElementById('length').value);
+            const adjustedCoordinates = getAdjustedCoordinatesForRoughCutting();
+            const minimumRoughDiameter = Math.min(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+            const minimumFineDiameter = Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
+            const uniqueRoughPathDiameters = [...new Set(adjustedCoordinates.map(coordinate => coordinate.diameter))].sort((a, b) => b - a);
+            
+            let totalMachiningTime = 0;
+            const cuttingPassDetails = [];
+
+            if (roughCuttingEnabled) {
+                let currentCutDiameter = outerDiameterValue - (cutDepthValue * 2);
+
+                while (currentCutDiameter >= minimumRoughDiameter) {
+                    const calculatedRotationsPerMinute = (cuttingSpeedValue / currentCutDiameter) * 318;
+                    const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                    const cuttableLength = calculateCuttableLengthForDiameter(currentCutDiameter, lengthValue, true);
+                    
+                    const revolutionsRequired = cuttableLength / feedRateValue;
+                    const passTime = revolutionsRequired / revolutionsPerMinute;
+
+                    cuttingPassDetails.push({
+                        diameter: currentCutDiameter,
+                        rpm: revolutionsPerMinute,
+                        length: cuttableLength,
+                        time: passTime,
+                        operation: 'cutting',
+                        cuttingType: 'rough'
+                    });
+
+                    totalMachiningTime += passTime;
+
+                    if (currentCutDiameter === minimumRoughDiameter) {
+                        break;
+                    }
+
+                    const remainingMaterial = currentCutDiameter - minimumRoughDiameter;
+                    const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
+                    let nextCutDiameter = currentCutDiameter - nextCutDepth;
+                    
+                    if (nextCutDiameter < minimumRoughDiameter) {
+                        nextCutDiameter = minimumRoughDiameter;
+                    }
+
+                    currentCutDiameter = nextCutDiameter;
+
+                    const pathDiametersInRange = uniqueRoughPathDiameters.filter(pathDiameter => 
+                        pathDiameter < currentCutDiameter + nextCutDepth && pathDiameter > currentCutDiameter
+                    );
+
+                    for (const pathDiameter of pathDiametersInRange) {
+                        const coordinatesAtPathDiameter = adjustedCoordinates.filter(coordinate => 
+                            Math.abs(coordinate.diameter - pathDiameter) < 0.1
+                        );
+
+                        if (coordinatesAtPathDiameter.length >= 2) {
+                            const startLength = Math.min(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                            const endLength = Math.max(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                            const pathCuttingLength = endLength - startLength;
+                            
+                            if (pathCuttingLength > 0) {
+                                const calculatedPathRotationsPerMinute = (cuttingSpeedValue / pathDiameter) * 318;
+                                const pathRevolutionsPerMinute = Math.min(calculatedPathRotationsPerMinute, maximumRotationsPerMinuteValue);
+                                const pathRevolutionsRequired = pathCuttingLength / feedRateValue;
+                                const pathCuttingTime = pathRevolutionsRequired / pathRevolutionsPerMinute;
+
+                                cuttingPassDetails.push({
+                                    diameter: pathDiameter,
+                                    rpm: pathRevolutionsPerMinute,
+                                    length: pathCuttingLength,
+                                    time: pathCuttingTime,
+                                    operation: 'cutting',
+                                    cuttingType: 'rough'
+                                });
+
+                                totalMachiningTime += pathCuttingTime;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (fineCuttingEnabled) {
+                for (let coordinateIndex = 1; coordinateIndex < coordinatesList.length; coordinateIndex++) {
+                    const previousCoordinate = coordinatesList[coordinateIndex - 1];
+                    const currentCoordinate = coordinatesList[coordinateIndex];
+                    
+                    const startDiameter = previousCoordinate.diameter;
+                    const endDiameter = currentCoordinate.diameter;
+                    const startLength = previousCoordinate.length;
+                    const endLength = currentCoordinate.length;
+                    
+                    if (startLength === endLength && startDiameter !== endDiameter) {
+                        const medianDiameter = (startDiameter + endDiameter) / 2;
+                        const traversalDistance = Math.abs(endDiameter - startDiameter) / 2;
+                        const calculatedRotationsPerMinute = (fineCuttingSpeedValue / medianDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const revolutionsRequired = traversalDistance / fineFeedRateValue;
+                        const traversalTime = revolutionsRequired / revolutionsPerMinute;
+                        
+                        cuttingPassDetails.push({
+                            diameter: medianDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: traversalDistance,
+                            time: traversalTime,
+                            operation: 'cutting',
+                            cuttingType: 'fine'
+                        });
+                        
+                        totalMachiningTime += traversalTime;
+                    } else if (startLength !== endLength) {
+                        const segmentLength = Math.abs(endLength - startLength);
+                        const medianDiameter = (startDiameter + endDiameter) / 2;
+                        const calculatedRotationsPerMinute = (fineCuttingSpeedValue / medianDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const revolutionsRequired = segmentLength / fineFeedRateValue;
+                        const segmentTime = revolutionsRequired / revolutionsPerMinute;
+                        
+                        cuttingPassDetails.push({
+                            diameter: medianDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: segmentLength,
+                            time: segmentTime,
+                            operation: 'cutting',
+                            cuttingType: 'fine'
+                        });
+                        
+                        totalMachiningTime += segmentTime;
+                    }
+                }
+            }
+
+            return { 
+                time: totalMachiningTime,
+                cuttingPasses: cuttingPassDetails
+            };
+        }
+
+        function calculateTraversalTime(traversalDistance, feedRateValue, revolutionsPerMinute) {
+            const traversalFeedRate = feedRateValue * 3;
+            const revolutionsRequired = traversalDistance / traversalFeedRate;
+            return revolutionsRequired / revolutionsPerMinute;
+        }
+
+        function clearPreviewCanvas() {
+            const canvas = document.getElementById('pathPreview');
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function clearCoordinatePath() {
+            coordinatesList = [];
+            document.getElementById('coordinateDiameter').value = '';
+            document.getElementById('coordinateLength').value = '0';
+            clearPreviewCanvas();
+            drawPreviewBackground();
+        }
+
+        function clearTurningCalculatorInputs() {
+            document.getElementById('outerDiameter').value = '';
+            document.getElementById('innerDiameter').value = '';
+            document.getElementById('length').value = '';
+            document.getElementById('enableRoughCutting').checked = true;
+            document.getElementById('feedRate').value = '0.3';
+            document.getElementById('cutDepth').value = '3';
+            document.getElementById('cuttingSpeed').value = '220';
+            document.getElementById('enableFineCutting').checked = false;
+            document.getElementById('fineFeedRate').value = '0.1';
+            document.getElementById('fineCutDepth').value = '0.5';
+            document.getElementById('fineCuttingSpeed').value = '280';
+            document.getElementById('maximumRotationsPerMinute').value = '1000';
+            updateCoordinateLengthState();
+            updateRoughCuttingInputVisibility();
+            updateFineCuttingInputVisibility();
+            document.getElementById('result').textContent = 'Ange värden och klicka Beräkna';
+            document.getElementById('result').className = 'result';
+        }
+
+        function addCoordinate() {
+            const diameterValue = parseFloat(document.getElementById('coordinateDiameter').value);
+            const lengthValue = parseFloat(document.getElementById('coordinateLength').value);
+            const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
+            const maximumLengthValue = parseFloat(document.getElementById('length').value);
+
+            if (isNaN(diameterValue) || isNaN(lengthValue) || isNaN(outerDiameterValue) || isNaN(maximumLengthValue)) {
+                return;
+            }
+
+            if (diameterValue > outerDiameterValue || lengthValue > maximumLengthValue) {
+                return;
+            }
+
+            const activeElement = document.activeElement;
+            const coordinateDiameterInput = document.getElementById('coordinateDiameter');
+            const coordinateLengthInput = document.getElementById('coordinateLength');
+
+            coordinatesList.push({ diameter: diameterValue, length: lengthValue });
+            drawPreviewBackground();
+
+            if (activeElement && activeElement.id === 'coordinateDiameter') {
+                coordinateLengthInput.focus();
+                coordinateLengthInput.select();
+            } else {
+                coordinateDiameterInput.focus();
+                coordinateDiameterInput.select();
+            }
+        }
+
         function getMinimumDiameterAtLength(targetLength) {
             if (coordinatesList.length < 2) return 0;
 
@@ -230,182 +605,15 @@
             return Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
         }
 
-        function drawCoordinatePath(context, outerDiameterValue, lengthValue) {
-            const canvas = document.getElementById('pathPreview');
-            
-            context.strokeStyle = '#ff9500';
-            context.fillStyle = '#ff9500';
-            context.lineWidth = 2;
-            
-            context.beginPath();
-            coordinatesList.forEach((coordinate, index) => {
-                const xPosition = canvas.width - (coordinate.length / lengthValue) * canvas.width;
-                const yPosition = canvas.height / 2 - (coordinate.diameter / outerDiameterValue) * (canvas.height / 2);
-                
-                if (index === 0) {
-                    context.moveTo(xPosition, yPosition);
-                } else {
-                    context.lineTo(xPosition, yPosition);
-                }
-            });
-            context.stroke();
-            
-            coordinatesList.forEach((coordinate) => {
-                const xPosition = canvas.width - (coordinate.length / lengthValue) * canvas.width;
-                const yPosition = canvas.height / 2 - (coordinate.diameter / outerDiameterValue) * (canvas.height / 2);
-                
-                context.beginPath();
-                context.arc(xPosition, yPosition, 3, 0, 2 * Math.PI);
-                context.fill();
-            });
-        }
-
-        function calculateTurningTime() {
-            if (coordinatesList.length < 2) {
-                return { error: 'Minst två koordinater med olika längdvärden krävs för beräkning' };
-            }
-
-            const feedRateValue = parseFloat(document.getElementById('feedRate').value);
-            const cutDepthValue = parseFloat(document.getElementById('cutDepth').value);
-            const cuttingSpeedValue = parseFloat(document.getElementById('cuttingSpeed').value);
-
-            if (isNaN(feedRateValue) || isNaN(cutDepthValue) || isNaN(cuttingSpeedValue)) {
-                return { error: 'Ogiltiga skärdata' };
-            }
-
-            const hasLengthVariation = coordinatesList.some((coordinate, index) => 
-                index > 0 && coordinate.length !== coordinatesList[0].length
-            );
-
-            if (!hasLengthVariation) {
-                return { error: 'Koordinater måste ha olika längdvärden' };
-            }
-
-            const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
-            const lengthValue = parseFloat(document.getElementById('length').value);
-            const minimumDiameter = Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
-            const uniquePathDiameters = [...new Set(coordinatesList.map(coordinate => coordinate.diameter))].sort((a, b) => b - a);
-            
-            let totalMachiningTime = 0;
-            let currentCutDiameter = outerDiameterValue - (cutDepthValue * 2);
-            const cuttingPassDetails = [];
-            let previousCuttableLength = 0;
-
-            while (currentCutDiameter >= minimumDiameter) {
-                const revolutionsPerMinute = (cuttingSpeedValue / currentCutDiameter) * 318;
-                const cuttableLength = calculateCuttableLengthForDiameter(currentCutDiameter, lengthValue);
-                
-                const revolutionsRequired = cuttableLength / feedRateValue;
-                const passTime = revolutionsRequired / revolutionsPerMinute;
-
-                cuttingPassDetails.push({
-                    diameter: currentCutDiameter,
-                    rpm: revolutionsPerMinute,
-                    length: cuttableLength,
-                    time: passTime,
-                    operation: 'cutting'
-                });
-
-                totalMachiningTime += passTime;
-                previousCuttableLength = cuttableLength;
-
-                if (currentCutDiameter === minimumDiameter) {
-                    break;
-                }
-
-                const remainingMaterial = currentCutDiameter - minimumDiameter;
-                const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
-                let nextCutDiameter = currentCutDiameter - nextCutDepth;
-                
-                if (nextCutDiameter < minimumDiameter) {
-                    nextCutDiameter = minimumDiameter;
-                }
-
-                const pathDiametersInRange = uniquePathDiameters.filter(pathDiameter => 
-                    pathDiameter < currentCutDiameter && pathDiameter > nextCutDiameter
-                );
-
-                for (const pathDiameter of pathDiametersInRange) {
-                    const coordinatesAtPathDiameter = coordinatesList.filter(coordinate => 
-                        Math.abs(coordinate.diameter - pathDiameter) < 0.1
-                    );
-
-                    if (coordinatesAtPathDiameter.length >= 2) {
-                        const startLength = Math.min(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
-                        const endLength = Math.max(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
-                        const pathCuttingLength = endLength - startLength;
-                        
-                        if (pathCuttingLength > 0) {
-                            if (pathCuttingLength !== previousCuttableLength) {
-                                cuttingPassDetails.push({
-                                    diameter: pathDiameter,
-                                    rpm: 0,
-                                    length: 0,
-                                    time: 0,
-                                    operation: 'traversal'
-                                });
-                            }
-
-                            const pathRevolutionsPerMinute = (cuttingSpeedValue / pathDiameter) * 318;
-                            const pathRevolutionsRequired = pathCuttingLength / feedRateValue;
-                            const pathCuttingTime = pathRevolutionsRequired / pathRevolutionsPerMinute;
-
-                            cuttingPassDetails.push({
-                                diameter: pathDiameter,
-                                rpm: pathRevolutionsPerMinute,
-                                length: pathCuttingLength,
-                                time: pathCuttingTime,
-                                operation: 'cutting'
-                            });
-
-                            totalMachiningTime += pathCuttingTime;
-                            previousCuttableLength = pathCuttingLength;
-                        }
-                    }
-                }
-
-                currentCutDiameter = nextCutDiameter;
-            }
-
-            return { 
-                time: totalMachiningTime,
-                cuttingPasses: cuttingPassDetails
-            };
-        }
-
-        function calculateCuttableLengthForDiameter(cuttingDiameter, maximumLength) {
-            let cuttableLength = 0;
-            
-            for (let currentLength = 0; currentLength <= maximumLength; currentLength += 0.1) {
-                const minimumDiameterAtPosition = getMinimumDiameterAtLength(currentLength);
-                
-                if (cuttingDiameter >= minimumDiameterAtPosition) {
-                    cuttableLength = currentLength;
-                } else {
-                    break;
-                }
-            }
-            
-            return cuttableLength;
-        }
-
-        function calculateTraversalTime(traversalDistance, feedRateValue, revolutionsPerMinute) {
-            const traversalFeedRate = feedRateValue * 3;
-            const revolutionsRequired = traversalDistance / traversalFeedRate;
-            return revolutionsRequired / revolutionsPerMinute;
-        }
-
         function performTurningTimeCalculation() {
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
             const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
             const lengthValue = parseFloat(document.getElementById('length').value);
-            const feedRateValue = parseFloat(document.getElementById('feedRate').value);
-            const cutDepthValue = parseFloat(document.getElementById('cutDepth').value);
-            const cuttingSpeedValue = parseFloat(document.getElementById('cuttingSpeed').value);
+            const maximumRotationsPerMinuteValue = parseFloat(document.getElementById('maximumRotationsPerMinute').value);
             
             const resultElement = document.getElementById('result');
             
-            if (isNaN(outerDiameterValue) || isNaN(lengthValue) || isNaN(feedRateValue) || isNaN(cutDepthValue) || isNaN(cuttingSpeedValue)) {
+            if (isNaN(outerDiameterValue) || isNaN(lengthValue) || isNaN(maximumRotationsPerMinuteValue)) {
                 resultElement.textContent = 'Vänligen ange giltiga värden för obligatoriska fält';
                 resultElement.className = 'result error';
                 return;
@@ -422,10 +630,32 @@
             const totalTimeInMinutes = turningTimeResult.time;
             const totalTimeInSeconds = totalTimeInMinutes * 60;
 
+            const reorderedCuttingPasses = [];
+            let passIndex = 0;
+
+            while (passIndex < turningTimeResult.cuttingPasses.length) {
+                const currentPass = turningTimeResult.cuttingPasses[passIndex];
+                
+                if (currentPass.operation === 'traversal' && passIndex + 2 < turningTimeResult.cuttingPasses.length) {
+                    const firstPassAfterTraversal = turningTimeResult.cuttingPasses[passIndex + 1];
+                    const secondPassAfterTraversal = turningTimeResult.cuttingPasses[passIndex + 2];
+                    
+                    reorderedCuttingPasses.push(currentPass);
+                    reorderedCuttingPasses.push(secondPassAfterTraversal);
+                    reorderedCuttingPasses.push(firstPassAfterTraversal);
+                    
+                    passIndex += 3;
+                } else {
+                    reorderedCuttingPasses.push(currentPass);
+                    passIndex++;
+                }
+            }
+
             let tableHtml = `
                 <table style="width: 100%; border-collapse: collapse; color: white; margin-bottom: 10px;">
                     <thead>
                         <tr style="border-bottom: 1px solid #ff9500;">
+                            <th style="text-align: left; padding: 5px;">Typ</th>
                             <th style="text-align: left; padding: 5px;">Diameter</th>
                             <th style="text-align: left; padding: 5px;">RPM</th>
                             <th style="text-align: left; padding: 5px;">Längd</th>
@@ -435,28 +665,21 @@
                     <tbody>
             `;
 
-            turningTimeResult.cuttingPasses.forEach((cuttingPass) => {
+            reorderedCuttingPasses.forEach((cuttingPass) => {
                 const passTimeInSeconds = cuttingPass.time * 60;
                 
                 if (cuttingPass.operation === 'cutting') {
+                    const cuttingTypeLabel = cuttingPass.cuttingType === 'rough' ? 'Grov' : 'Fin';
                     tableHtml += `
                         <tr style="border-bottom: 1px solid #333;">
+                            <td style="padding: 3px;">${cuttingTypeLabel}</td>
                             <td style="padding: 3px;">${cuttingPass.diameter.toFixed(1)} mm</td>
                             <td style="padding: 3px;">${cuttingPass.rpm.toFixed(0)}</td>
                             <td style="padding: 3px;">${cuttingPass.length.toFixed(1)} mm</td>
                             <td style="text-align: right; padding: 3px;">${passTimeInSeconds.toFixed(1)} s</td>
                         </tr>
                     `;
-                } else if (cuttingPass.operation === 'traversal') {
-                    tableHtml += `
-                        <tr style="border-bottom: 1px solid #333; color: #888;">
-                            <td style="padding: 3px;">↕ Förflyttning</td>
-                            <td style="padding: 3px;">-</td>
-                            <td style="padding: 3px;">-</td>
-                            <td style="text-align: right; padding: 3px;">${passTimeInSeconds.toFixed(1)} s</td>
-                        </tr>
-                    `;
-                }
+                } 
             });
 
             tableHtml += `
@@ -471,34 +694,53 @@
             resultElement.className = 'result';
         }
 
-        function clearTurningCalculatorInputs() {
-            document.getElementById('outerDiameter').value = '';
-            document.getElementById('innerDiameter').value = '';
-            document.getElementById('length').value = '';
-            document.getElementById('feedRate').value = '0.3';
-            document.getElementById('cutDepth').value = '3';
-            document.getElementById('cuttingSpeed').value = '220';
+        function clearCoordinateInputs() {
             document.getElementById('coordinateDiameter').value = '';
             document.getElementById('coordinateLength').value = '0';
-            coordinatesList = [];
-            clearPreviewCanvas();
-            updateCoordinateLengthState();
-            document.getElementById('result').textContent = 'Ange värden och klicka Beräkna';
-            document.getElementById('result').className = 'result';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const outerDiameterInput = document.getElementById('outerDiameter');
             const lengthInput = document.getElementById('length');
+            const enableRoughCuttingSwitch = document.getElementById('enableRoughCutting');
+            const enableFineCuttingSwitch = document.getElementById('enableFineCutting');
+            const coordinateDiameterInput = document.getElementById('coordinateDiameter');
+            const coordinateLengthInput = document.getElementById('coordinateLength');
             
             outerDiameterInput.addEventListener('input', updateCoordinateLengthState);
             lengthInput.addEventListener('input', updateCoordinateLengthState);
+            enableRoughCuttingSwitch.addEventListener('change', updateRoughCuttingInputVisibility);
+            enableFineCuttingSwitch.addEventListener('change', updateFineCuttingInputVisibility);
+            
+            coordinateDiameterInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addCoordinate();
+                }
+            });
+            
+            coordinateLengthInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addCoordinate();
+                }
+            });
             
             updateCoordinateLengthState();
+            updateRoughCuttingInputVisibility();
+            updateFineCuttingInputVisibility();
+            
+            coordinateDiameterInput.focus();
         });
 
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
+            const activeElement = document.activeElement;
+            const isCoordinateInput = activeElement && (
+                activeElement.id === 'coordinateDiameter' || 
+                activeElement.id === 'coordinateLength'
+            );
+            
+            if (event.key === 'Enter' && !isCoordinateInput) {
                 event.preventDefault();
                 performTurningTimeCalculation();
             } else if (event.key === 'Escape') {
