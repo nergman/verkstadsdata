@@ -141,6 +141,7 @@
             const canvas = document.getElementById('pathPreview');
             const context = canvas.getContext('2d');
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
+            const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value);
             const lengthValue = parseFloat(document.getElementById('length').value);
             
             if (isNaN(outerDiameterValue) || isNaN(lengthValue)) return;
@@ -160,6 +161,21 @@
             context.lineTo(canvas.width, canvas.height);
             context.stroke();
             
+            if (!isNaN(innerDiameterValue) && innerDiameterValue > 0) {
+                const innerDiameterYPosition = canvas.height - (innerDiameterValue / outerDiameterValue) * canvas.height;
+                
+                context.strokeStyle = '#ffffff';
+                context.lineWidth = 1;
+                context.setLineDash([5, 3]);
+                
+                context.beginPath();
+                context.moveTo(0, innerDiameterYPosition);
+                context.lineTo(canvas.width, innerDiameterYPosition);
+                context.stroke();
+                
+                context.setLineDash([]);
+            }
+            
             if (coordinatesList.length > 0) {
                 drawCuttingPasses(context, outerDiameterValue, lengthValue);
                 drawCoordinatePath(context, outerDiameterValue, lengthValue);
@@ -168,16 +184,29 @@
 
         function drawCuttingPasses(context, outerDiameterValue, lengthValue) {
             const cutDepthValue = parseFloat(document.getElementById('cutDepth').value);
+            const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
+            const isInternalCutting = innerDiameterValue > 0;
+            
             if (isNaN(cutDepthValue)) return;
 
             const canvas = document.getElementById('pathPreview');
-            const minimumDiameter = Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
-            let currentCutDiameter = outerDiameterValue - (cutDepthValue * 2);
+            let currentCutDiameter;
+            let targetDiameter;
+
+            if (isInternalCutting) {
+                const maximumDiameter = Math.max(...coordinatesList.map(coordinate => coordinate.diameter));
+                currentCutDiameter = innerDiameterValue + (cutDepthValue * 2);
+                targetDiameter = maximumDiameter;
+            } else {
+                const minimumDiameter = Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
+                currentCutDiameter = outerDiameterValue - (cutDepthValue * 2);
+                targetDiameter = minimumDiameter;
+            }
 
             context.strokeStyle = '#00ff00';
             context.lineWidth = 1;
 
-            while (currentCutDiameter >= minimumDiameter) {
+            while (isInternalCutting ? currentCutDiameter <= targetDiameter : currentCutDiameter >= targetDiameter) {
                 const yPosition = canvas.height - (currentCutDiameter / outerDiameterValue) * canvas.height;
                 
                 context.beginPath();
@@ -185,9 +214,15 @@
                 
                 for (let pixelPosition = canvas.width; pixelPosition >= 0; pixelPosition--) {
                     const currentLength = lengthValue * (1 - pixelPosition / canvas.width);
-                    const minimumDiameterAtLength = getMinimumDiameterAtLength(currentLength);
+                    const boundaryDiameterAtLength = isInternalCutting ? 
+                        getMaximumDiameterAtLength(currentLength) : 
+                        getMinimumDiameterAtLength(currentLength);
                     
-                    if (currentCutDiameter >= minimumDiameterAtLength) {
+                    const canCut = isInternalCutting ? 
+                        currentCutDiameter <= boundaryDiameterAtLength : 
+                        currentCutDiameter >= boundaryDiameterAtLength;
+                    
+                    if (canCut) {
                         if (!lineStarted) {
                             context.moveTo(pixelPosition, yPosition);
                             lineStarted = true;
@@ -201,16 +236,26 @@
                 
                 context.stroke();
                 
-                if (currentCutDiameter === minimumDiameter) {
+                if (currentCutDiameter === targetDiameter) {
                     break;
                 }
                 
-                const remainingMaterial = currentCutDiameter - minimumDiameter;
-                const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
-                currentCutDiameter -= nextCutDepth;
-                
-                if (currentCutDiameter < minimumDiameter) {
-                    currentCutDiameter = minimumDiameter;
+                if (isInternalCutting) {
+                    const remainingMaterial = targetDiameter - currentCutDiameter;
+                    const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
+                    currentCutDiameter += nextCutDepth;
+                    
+                    if (currentCutDiameter > targetDiameter) {
+                        currentCutDiameter = targetDiameter;
+                    }
+                } else {
+                    const remainingMaterial = currentCutDiameter - targetDiameter;
+                    const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
+                    currentCutDiameter -= nextCutDepth;
+                    
+                    if (currentCutDiameter < targetDiameter) {
+                        currentCutDiameter = targetDiameter;
+                    }
                 }
             }
         }
@@ -285,6 +330,89 @@
             }));
         }
 
+        function getMinimumDiameterAtLength(targetLength) {
+            if (coordinatesList.length < 2) return 0;
+
+            for (let segmentIndex = 1; segmentIndex < coordinatesList.length; segmentIndex++) {
+                const previousCoordinate = coordinatesList[segmentIndex - 1];
+                const currentCoordinate = coordinatesList[segmentIndex];
+                
+                const minimumLength = Math.min(previousCoordinate.length, currentCoordinate.length);
+                const maximumLength = Math.max(previousCoordinate.length, currentCoordinate.length);
+                
+                if (targetLength >= minimumLength && targetLength <= maximumLength) {
+                    const lengthRatio = (targetLength - previousCoordinate.length) / (currentCoordinate.length - previousCoordinate.length);
+                    return previousCoordinate.diameter + lengthRatio * (currentCoordinate.diameter - previousCoordinate.diameter);
+                }
+            }
+
+            if (targetLength < coordinatesList[0].length) {
+                return coordinatesList[0].diameter;
+            }
+            
+            if (targetLength > coordinatesList[coordinatesList.length - 1].length) {
+                return coordinatesList[coordinatesList.length - 1].diameter;
+            }
+
+            return Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
+        }
+
+        function getMaximumDiameterAtLength(targetLength) {
+            if (coordinatesList.length < 2) return 0;
+
+            for (let segmentIndex = 1; segmentIndex < coordinatesList.length; segmentIndex++) {
+                const previousCoordinate = coordinatesList[segmentIndex - 1];
+                const currentCoordinate = coordinatesList[segmentIndex];
+                
+                const minimumLength = Math.min(previousCoordinate.length, currentCoordinate.length);
+                const maximumLength = Math.max(previousCoordinate.length, currentCoordinate.length);
+                
+                if (targetLength >= minimumLength && targetLength <= maximumLength) {
+                    const lengthRatio = (targetLength - previousCoordinate.length) / (currentCoordinate.length - previousCoordinate.length);
+                    return previousCoordinate.diameter + lengthRatio * (currentCoordinate.diameter - previousCoordinate.diameter);
+                }
+            }
+
+            if (targetLength < coordinatesList[0].length) {
+                return coordinatesList[0].diameter;
+            }
+            
+            if (targetLength > coordinatesList[coordinatesList.length - 1].length) {
+                return coordinatesList[coordinatesList.length - 1].diameter;
+            }
+
+            return Math.max(...coordinatesList.map(coordinate => coordinate.diameter));
+        }
+
+        function getMaximumDiameterAtLengthForCuttingType(targetLength, useRoughCuttingPath = false) {
+            const coordinatesToUse = useRoughCuttingPath ? getAdjustedCoordinatesForRoughCutting() : coordinatesList;
+            
+            if (coordinatesToUse.length < 2) return 0;
+
+            for (let segmentIndex = 1; segmentIndex < coordinatesToUse.length; segmentIndex++) {
+                const previousCoordinate = coordinatesToUse[segmentIndex - 1];
+                const currentCoordinate = coordinatesToUse[segmentIndex];
+                
+                const minimumLength = Math.min(previousCoordinate.length, currentCoordinate.length);
+                const maximumLength = Math.max(previousCoordinate.length, currentCoordinate.length);
+                
+                if (targetLength >= minimumLength && targetLength <= maximumLength) {
+                    const lengthRatio = (targetLength - previousCoordinate.length) / (currentCoordinate.length - previousCoordinate.length);
+                    return previousCoordinate.diameter + lengthRatio * (currentCoordinate.diameter - previousCoordinate.diameter);
+                }
+            }
+
+            if (targetLength < coordinatesToUse[0].length) {
+                return coordinatesToUse[0].diameter;
+            }
+            
+            if (targetLength > coordinatesToUse[coordinatesToUse.length - 1].length) {
+                return coordinatesToUse[coordinatesToUse.length - 1].diameter;
+            }
+
+            return Math.max(...coordinatesToUse.map(coordinate => coordinate.diameter));
+        }
+
         function getMinimumDiameterAtLengthForCuttingType(targetLength, useRoughCuttingPath = false) {
             const coordinatesToUse = useRoughCuttingPath ? getAdjustedCoordinatesForRoughCutting() : coordinatesList;
             
@@ -330,6 +458,37 @@
             return cuttableLength;
         }
 
+        function addCoordinate() {
+            const diameterValue = parseFloat(document.getElementById('coordinateDiameter').value);
+            const lengthValue = parseFloat(document.getElementById('coordinateLength').value);
+            const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
+            const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
+            const maximumLengthValue = parseFloat(document.getElementById('length').value);
+
+            if (isNaN(diameterValue) || isNaN(lengthValue) || isNaN(outerDiameterValue) || isNaN(maximumLengthValue)) {
+                return;
+            }
+
+            if (diameterValue > outerDiameterValue || diameterValue < innerDiameterValue || lengthValue > maximumLengthValue) {
+                return;
+            }
+
+            const activeElement = document.activeElement;
+            const coordinateDiameterInput = document.getElementById('coordinateDiameter');
+            const coordinateLengthInput = document.getElementById('coordinateLength');
+
+            coordinatesList.push({ diameter: diameterValue, length: lengthValue });
+            drawPreviewBackground();
+
+            if (activeElement && activeElement.id === 'coordinateDiameter') {
+                coordinateLengthInput.focus();
+                coordinateLengthInput.select();
+            } else {
+                coordinateDiameterInput.focus();
+                coordinateDiameterInput.select();
+            }
+        }
+
         function calculateTurningTime() {
             if (coordinatesList.length < 2) {
                 return { error: 'Minst två koordinater med olika längdvärden krävs för beräkning' };
@@ -371,81 +530,167 @@
             }
 
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
+            const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
             const lengthValue = parseFloat(document.getElementById('length').value);
             const adjustedCoordinates = getAdjustedCoordinatesForRoughCutting();
-            const minimumRoughDiameter = Math.min(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+            const isInternalCutting = innerDiameterValue > 0;
+            
+            let minimumRoughDiameter, maximumRoughDiameter, uniqueRoughPathDiameters;
+            
+            if (isInternalCutting) {
+                minimumRoughDiameter = Math.min(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+                maximumRoughDiameter = Math.max(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+            } else {
+                minimumRoughDiameter = Math.min(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+            }
+            
             const minimumFineDiameter = Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
-            const uniqueRoughPathDiameters = [...new Set(adjustedCoordinates.map(coordinate => coordinate.diameter))].sort((a, b) => b - a);
+            const maximumFineDiameter = Math.max(...coordinatesList.map(coordinate => coordinate.diameter));
+            uniqueRoughPathDiameters = [...new Set(adjustedCoordinates.map(coordinate => coordinate.diameter))].sort((a, b) => b - a);
             
             let totalMachiningTime = 0;
             const cuttingPassDetails = [];
 
             if (roughCuttingEnabled) {
-                let currentCutDiameter = outerDiameterValue - (cutDepthValue * 2);
-
-                while (currentCutDiameter >= minimumRoughDiameter) {
-                    const calculatedRotationsPerMinute = (cuttingSpeedValue / currentCutDiameter) * 318;
-                    const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
-                    const cuttableLength = calculateCuttableLengthForDiameter(currentCutDiameter, lengthValue, true);
+                let currentCutDiameter;
+                
+                if (isInternalCutting) {
+                    currentCutDiameter = innerDiameterValue + (cutDepthValue * 2);
                     
-                    const revolutionsRequired = cuttableLength / feedRateValue;
-                    const passTime = revolutionsRequired / revolutionsPerMinute;
+                    while (currentCutDiameter <= maximumRoughDiameter) {
+                        const calculatedRotationsPerMinute = (cuttingSpeedValue / currentCutDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const cuttableLength = calculateCuttableLengthForDiameterInternal(currentCutDiameter, lengthValue, true);
+                        
+                        const revolutionsRequired = cuttableLength / feedRateValue;
+                        const passTime = revolutionsRequired / revolutionsPerMinute;
 
-                    cuttingPassDetails.push({
-                        diameter: currentCutDiameter,
-                        rpm: revolutionsPerMinute,
-                        length: cuttableLength,
-                        time: passTime,
-                        operation: 'cutting',
-                        cuttingType: 'rough'
-                    });
+                        cuttingPassDetails.push({
+                            diameter: currentCutDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: cuttableLength,
+                            time: passTime,
+                            operation: 'cutting',
+                            cuttingType: 'rough'
+                        });
 
-                    totalMachiningTime += passTime;
+                        totalMachiningTime += passTime;
 
-                    if (currentCutDiameter === minimumRoughDiameter) {
-                        break;
-                    }
+                        if (currentCutDiameter === maximumRoughDiameter) {
+                            break;
+                        }
 
-                    const remainingMaterial = currentCutDiameter - minimumRoughDiameter;
-                    const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
-                    let nextCutDiameter = currentCutDiameter - nextCutDepth;
-                    
-                    if (nextCutDiameter < minimumRoughDiameter) {
-                        nextCutDiameter = minimumRoughDiameter;
-                    }
+                        const remainingMaterial = maximumRoughDiameter - currentCutDiameter;
+                        const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
+                        let nextCutDiameter = currentCutDiameter + nextCutDepth;
+                        
+                        if (nextCutDiameter > maximumRoughDiameter) {
+                            nextCutDiameter = maximumRoughDiameter;
+                        }
 
-                    currentCutDiameter = nextCutDiameter;
+                        currentCutDiameter = nextCutDiameter;
 
-                    const pathDiametersInRange = uniqueRoughPathDiameters.filter(pathDiameter => 
-                        pathDiameter < currentCutDiameter + nextCutDepth && pathDiameter > currentCutDiameter
-                    );
-
-                    for (const pathDiameter of pathDiametersInRange) {
-                        const coordinatesAtPathDiameter = adjustedCoordinates.filter(coordinate => 
-                            Math.abs(coordinate.diameter - pathDiameter) < 0.1
+                        const pathDiametersInRange = uniqueRoughPathDiameters.filter(pathDiameter => 
+                            pathDiameter > currentCutDiameter - nextCutDepth && pathDiameter < currentCutDiameter
                         );
 
-                        if (coordinatesAtPathDiameter.length >= 2) {
-                            const startLength = Math.min(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
-                            const endLength = Math.max(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
-                            const pathCuttingLength = endLength - startLength;
-                            
-                            if (pathCuttingLength > 0) {
-                                const calculatedPathRotationsPerMinute = (cuttingSpeedValue / pathDiameter) * 318;
-                                const pathRevolutionsPerMinute = Math.min(calculatedPathRotationsPerMinute, maximumRotationsPerMinuteValue);
-                                const pathRevolutionsRequired = pathCuttingLength / feedRateValue;
-                                const pathCuttingTime = pathRevolutionsRequired / pathRevolutionsPerMinute;
+                        for (const pathDiameter of pathDiametersInRange) {
+                            const coordinatesAtPathDiameter = adjustedCoordinates.filter(coordinate => 
+                                Math.abs(coordinate.diameter - pathDiameter) < 0.1
+                            );
 
-                                cuttingPassDetails.push({
-                                    diameter: pathDiameter,
-                                    rpm: pathRevolutionsPerMinute,
-                                    length: pathCuttingLength,
-                                    time: pathCuttingTime,
-                                    operation: 'cutting',
-                                    cuttingType: 'rough'
-                                });
+                            if (coordinatesAtPathDiameter.length >= 2) {
+                                const startLength = Math.min(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const endLength = Math.max(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const pathCuttingLength = endLength - startLength;
+                                
+                                if (pathCuttingLength > 0) {
+                                    const calculatedPathRotationsPerMinute = (cuttingSpeedValue / pathDiameter) * 318;
+                                    const pathRevolutionsPerMinute = Math.min(calculatedPathRotationsPerMinute, maximumRotationsPerMinuteValue);
+                                    const pathRevolutionsRequired = pathCuttingLength / feedRateValue;
+                                    const pathCuttingTime = pathRevolutionsRequired / pathRevolutionsPerMinute;
 
-                                totalMachiningTime += pathCuttingTime;
+                                    cuttingPassDetails.push({
+                                        diameter: pathDiameter,
+                                        rpm: pathRevolutionsPerMinute,
+                                        length: pathCuttingLength,
+                                        time: pathCuttingTime,
+                                        operation: 'cutting',
+                                        cuttingType: 'rough'
+                                    });
+
+                                    totalMachiningTime += pathCuttingTime;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    currentCutDiameter = outerDiameterValue - (cutDepthValue * 2);
+
+                    while (currentCutDiameter >= minimumRoughDiameter) {
+                        const calculatedRotationsPerMinute = (cuttingSpeedValue / currentCutDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const cuttableLength = calculateCuttableLengthForDiameter(currentCutDiameter, lengthValue, true);
+                        
+                        const revolutionsRequired = cuttableLength / feedRateValue;
+                        const passTime = revolutionsRequired / revolutionsPerMinute;
+
+                        cuttingPassDetails.push({
+                            diameter: currentCutDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: cuttableLength,
+                            time: passTime,
+                            operation: 'cutting',
+                            cuttingType: 'rough'
+                        });
+
+                        totalMachiningTime += passTime;
+
+                        if (currentCutDiameter === minimumRoughDiameter) {
+                            break;
+                        }
+
+                        const remainingMaterial = currentCutDiameter - minimumRoughDiameter;
+                        const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
+                        let nextCutDiameter = currentCutDiameter - nextCutDepth;
+                        
+                        if (nextCutDiameter < minimumRoughDiameter) {
+                            nextCutDiameter = minimumRoughDiameter;
+                        }
+
+                        currentCutDiameter = nextCutDiameter;
+
+                        const pathDiametersInRange = uniqueRoughPathDiameters.filter(pathDiameter => 
+                            pathDiameter < currentCutDiameter + nextCutDepth && pathDiameter > currentCutDiameter
+                        );
+
+                        for (const pathDiameter of pathDiametersInRange) {
+                            const coordinatesAtPathDiameter = adjustedCoordinates.filter(coordinate => 
+                                Math.abs(coordinate.diameter - pathDiameter) < 0.1
+                            );
+
+                            if (coordinatesAtPathDiameter.length >= 2) {
+                                const startLength = Math.min(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const endLength = Math.max(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const pathCuttingLength = endLength - startLength;
+                                
+                                if (pathCuttingLength > 0) {
+                                    const calculatedPathRotationsPerMinute = (cuttingSpeedValue / pathDiameter) * 318;
+                                    const pathRevolutionsPerMinute = Math.min(calculatedPathRotationsPerMinute, maximumRotationsPerMinuteValue);
+                                    const pathRevolutionsRequired = pathCuttingLength / feedRateValue;
+                                    const pathCuttingTime = pathRevolutionsRequired / pathRevolutionsPerMinute;
+
+                                    cuttingPassDetails.push({
+                                        diameter: pathDiameter,
+                                        rpm: pathRevolutionsPerMinute,
+                                        length: pathCuttingLength,
+                                        time: pathCuttingTime,
+                                        operation: 'cutting',
+                                        cuttingType: 'rough'
+                                    });
+
+                                    totalMachiningTime += pathCuttingTime;
+                                }
                             }
                         }
                     }
@@ -508,6 +753,22 @@
             };
         }
 
+        function calculateCuttableLengthForDiameterInternal(cuttingDiameter, maximumLength, useRoughCuttingPath = false) {
+            let cuttableLength = 0;
+            
+            for (let currentLength = 0; currentLength <= maximumLength; currentLength += 0.1) {
+                const minimumDiameterAtPosition = getMinimumDiameterAtLengthForCuttingType(currentLength, useRoughCuttingPath);
+                
+                if (cuttingDiameter <= minimumDiameterAtPosition) {
+                    cuttableLength = currentLength;
+                } else {
+                    break;
+                }
+            }
+            
+            return cuttableLength;
+        }
+
         function calculateTraversalTime(traversalDistance, feedRateValue, revolutionsPerMinute) {
             const traversalFeedRate = feedRateValue * 3;
             const revolutionsRequired = traversalDistance / traversalFeedRate;
@@ -552,13 +813,14 @@
             const diameterValue = parseFloat(document.getElementById('coordinateDiameter').value);
             const lengthValue = parseFloat(document.getElementById('coordinateLength').value);
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
+            const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
             const maximumLengthValue = parseFloat(document.getElementById('length').value);
 
             if (isNaN(diameterValue) || isNaN(lengthValue) || isNaN(outerDiameterValue) || isNaN(maximumLengthValue)) {
                 return;
             }
 
-            if (diameterValue > outerDiameterValue || lengthValue > maximumLengthValue) {
+            if (diameterValue > outerDiameterValue || diameterValue < innerDiameterValue || lengthValue > maximumLengthValue) {
                 return;
             }
 
