@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Svarvtidskalkylator</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="navigation">
@@ -13,110 +13,112 @@
 
     <h1>Svarvtidskalkylator</h1>
 
-    <div class="calculator layout">
-        <div style="grid-area: coordinateControls;">
-            <div class="coordinateInputRow">
-                <div class="inputGroup">
+    <div class="turning-time">
+        <div class="turning-time__coordinate-controls">
+            <div class="coordinate-input-row">
+                <div class="input-group">
                     <label for="coordinateDiameter">Diameter</label>
                     <input type="number" id="coordinateDiameter" step="any" placeholder="Ange diameter">
                 </div>
 
-                <div class="inputGroup">
+                <div class="input-group">
                     <label for="coordinateLength">Längd</label>
                     <input type="number" id="coordinateLength" step="any" value="0" placeholder="Ange längd">
                 </div>
 
-                <button class="coordinateClearButton" onclick="clearCoordinatePath()">Rensa</button>
-                <button class="coordinateButton" onclick="addCoordinate()">Lägg till</button>
+                <button class="coordinate-input-row__clear-button" onclick="clearCoordinatePath()">Rensa</button>
+                <button class="coordinate-input-row__add-button" onclick="addCoordinate()">Lägg till</button>
             </div>
         </div>
 
-        <div style="grid-area: preview;">
-            <canvas id="pathPreview" width="600" height="120" style="border: 1px solid #666; background-color: #111; width: 100%; height: 120px;"></canvas>
+        <div class="turning-time__preview">
+            <canvas id="pathPreview" width="600" height="120"></canvas>
         </div>
 
-        <div style="grid-area: mainParametersRow;" class="mainParametersRow">
-            <div class="inputGroup">
-                <label for="outerDiameter">Ytterdia</label>
-                <input type="number" id="outerDiameter" step="any" value="230" placeholder="Ange ytterdiameter">
-            </div>
+        <div class="turning-time__parameters-and-cutting-controls">
+            <div class="turning-time__main-parameters-row">
+                <div class="input-group">
+                    <label for="outerDiameter">Ytterdia</label>
+                    <input type="number" id="outerDiameter" step="any" value="230" placeholder="Ange ytterdiameter">
+                </div>
 
-            <div class="inputGroup">
-                <label for="length">Längd</label>
-                <input type="number" id="length" step="any" value="2000" placeholder="Ange längd">
-            </div>
+                <div class="input-group">
+                    <label for="length">Längd</label>
+                    <input type="number" id="length" step="any" value="2000" placeholder="Ange längd">
+                </div>
 
-            <div class="inputGroup">
-                <label for="innerDiameter">Innerdia</span></label>
-                <input type="number" id="innerDiameter" step="any" placeholder="Ange innerdiameter (valfritt)">
-            </div>
+                <div class="input-group">
+                    <label for="innerDiameter">Innerdia</label>
+                    <input type="number" id="innerDiameter" step="any" placeholder="Ange innerdiameter (valfritt)">
+                </div>
 
-            <div class="inputGroup">
-                <label for="maximumRotationsPerMinute">RPM MAX</label>
-                <input type="number" id="maximumRotationsPerMinute" step="any" value="1000" placeholder="Ange max RPM">
-            </div>
-        </div>
-
-        <div style="grid-area: roughCutControls;" class="cuttingControlsRow">
-            <div class="switch-container">
-                <div class="switch-group">
-                    <div class="switch-group-label">Grov</div>
-                    <label class="switch">
-                        <input type="checkbox" id="enableRoughCutting" checked>
-                        <span class="slider"></span>
-                    </label>
+                <div class="input-group">
+                    <label for="maximumRotationsPerMinute">RPM MAX</label>
+                    <input type="number" id="maximumRotationsPerMinute" step="any" value="1000" placeholder="Ange max RPM">
                 </div>
             </div>
 
-            <div class="inputGroup" id="roughFeedRateGroup">
-                <label for="feedRate">Matning</label>
-                <input type="number" id="feedRate" step="any" value="0.3" placeholder="Ange matningshastighet">
-            </div>
+            <div class="turning-time__rough-cut-controls cutting-controls-row">
+                <div class="switch-container">
+                    <div class="switch-group">
+                        <div class="switch-group-label">Grov</div>
+                        <label class="switch">
+                            <input type="checkbox" id="enableRoughCutting" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
 
-            <div class="inputGroup" id="roughCutDepthGroup">
-                <label for="cutDepth">Skärdjup</label>
-                <input type="number" id="cutDepth" step="any" value="3" placeholder="Ange skärdjup">
-            </div>
+                <div class="input-group" id="roughFeedRateGroup">
+                    <label for="feedRate">Matning</label>
+                    <input type="number" id="feedRate" step="any" value="0.3" placeholder="Ange matningshastighet">
+                </div>
 
-            <div class="inputGroup" id="roughCuttingSpeedGroup">
-                <label for="cuttingSpeed">Vc</label>
-                <input type="number" id="cuttingSpeed" step="any" value="220" placeholder="Ange skärhastighet">
-            </div>
-        </div>
+                <div class="input-group" id="roughCutDepthGroup">
+                    <label for="cutDepth">Skärdjup</label>
+                    <input type="number" id="cutDepth" step="any" value="3" placeholder="Ange skärdjup">
+                </div>
 
-        <div style="grid-area: fineCutControls;" class="cuttingControlsRow">
-            <div class="switch-container">
-                <div class="switch-group">
-                    <div class="switch-group-label">Fin</div>
-                    <label class="switch">
-                        <input type="checkbox" id="enableFineCutting">
-                        <span class="slider"></span>
-                    </label>
+                <div class="input-group" id="roughCuttingSpeedGroup">
+                    <label for="cuttingSpeed">Vc</label>
+                    <input type="number" id="cuttingSpeed" step="any" value="220" placeholder="Ange skärhastighet">
                 </div>
             </div>
 
-            <div class="inputGroup" id="fineFeedRateGroup" style="display: none;">
-                <label for="fineFeedRate">Matning</label>
-                <input type="number" id="fineFeedRate" step="any" value="0.18" placeholder="Ange matningshastighet">
-            </div>
+            <div class="turning-time__fine-cut-controls cutting-controls-row">
+                <div class="switch-container">
+                    <div class="switch-group">
+                        <div class="switch-group-label">Fin</div>
+                        <label class="switch">
+                            <input type="checkbox" id="enableFineCutting">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
 
-            <div class="inputGroup" id="fineCutDepthGroup" style="display: none;">
-                <label for="fineCutDepth">Skärdjup</label>
-                <input type="number" id="fineCutDepth" step="any" value="1.0" placeholder="Ange skärdjup">
-            </div>
+                <div class="input-group" id="fineFeedRateGroup">
+                    <label for="fineFeedRate">Matning</label>
+                    <input type="number" id="fineFeedRate" step="any" value="0.18" placeholder="Ange matningshastighet">
+                </div>
 
-            <div class="inputGroup" id="fineCuttingSpeedGroup" style="display: none;">
-                <label for="fineCuttingSpeed">Vc</label>
-                <input type="number" id="fineCuttingSpeed" step="any" value="280" placeholder="Ange skärhastighet">
+                <div class="input-group" id="fineCutDepthGroup">
+                    <label for="fineCutDepth">Skärdjup</label>
+                    <input type="number" id="fineCutDepth" step="any" value="1.0" placeholder="Ange skärdjup">
+                </div>
+
+                <div class="input-group" id="fineCuttingSpeedGroup">
+                    <label for="fineCuttingSpeed">Vc</label>
+                    <input type="number" id="fineCuttingSpeed" step="any" value="280" placeholder="Ange skärhastighet">
+                </div>
             </div>
         </div>
 
-        <div style="grid-area: results;">
+        <div class="turning-time__results">
             <div id="result" class="result">Ange värden och klicka Beräkna</div>
         </div>
 
-        <div style="grid-area: CalculateButton;">
-            <button class="calculateButton" onclick="performTurningTimeCalculation()">Beräkna</button>
+        <div class="turning-time__calculate-button">
+            <button class="turning-time__calculate-button-element" onclick="performTurningTimeCalculation()">Beräkna</button>
         </div>
     </div>
 
@@ -872,6 +874,7 @@
             const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
             const lengthValue = parseFloat(document.getElementById('length').value);
             const maximumRotationsPerMinuteValue = parseFloat(document.getElementById('maximumRotationsPerMinute').value);
+            const fineCuttingEnabled = document.getElementById('enableFineCutting').checked;
             
             const resultElement = document.getElementById('result');
             
@@ -888,9 +891,6 @@
                 resultElement.className = 'result error';
                 return;
             }
-
-            const totalTimeInMinutes = turningTimeResult.time;
-            const totalTimeInSeconds = totalTimeInMinutes * 60;
 
             const reorderedCuttingPasses = [];
             let passIndex = 0;
@@ -913,15 +913,18 @@
                 }
             }
 
+            let roughCutTimeTotal = 0;
+            let fineCutTimeTotal = 0;
+
             let tableHtml = `
-                <table style="width: 100%; border-collapse: collapse; color: white; margin-bottom: 10px;">
+                <table class="turning-time__results-table">
                     <thead>
-                        <tr style="border-bottom: 1px solid #ff9500;">
-                            <th style="text-align: left; padding: 5px;">Typ</th>
-                            <th style="text-align: left; padding: 5px;">Diameter</th>
-                            <th style="text-align: left; padding: 5px;">RPM</th>
-                            <th style="text-align: left; padding: 5px;">Längd</th>
-                            <th style="text-align: right; padding: 5px;">Tid</th>
+                        <tr>
+                            <th class="column-length">Längd</th>
+                            <th class="column-diameter">Diameter</th>
+                            <th class="column-rotations-per-minute">RPM</th>
+                            <th class="column-seconds">Sekunder</th>
+                            <th class="column-minutes">Minuter</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -931,14 +934,22 @@
                 const passTimeInSeconds = cuttingPass.time * 60;
                 
                 if (cuttingPass.operation === 'cutting') {
-                    const cuttingTypeLabel = cuttingPass.cuttingType === 'rough' ? 'Grov' : 'Fin';
+                    const cutTypeClass = cuttingPass.cuttingType === 'rough' ? 'time-rough-cut' : 'time-fine-cut';
+                    const passTimeInMinutes = Math.round(passTimeInSeconds / 60 * 2) / 2;
+                    
+                    if (cuttingPass.cuttingType === 'rough') {
+                        roughCutTimeTotal += passTimeInSeconds;
+                    } else {
+                        fineCutTimeTotal += passTimeInSeconds;
+                    }
+                    
                     tableHtml += `
-                        <tr style="border-bottom: 1px solid #333;">
-                            <td style="padding: 3px;">${cuttingTypeLabel}</td>
-                            <td style="padding: 3px;">${cuttingPass.diameter.toFixed(1)} mm</td>
-                            <td style="padding: 3px;">${cuttingPass.rpm.toFixed(0)}</td>
-                            <td style="padding: 3px;">${cuttingPass.length.toFixed(1)} mm</td>
-                            <td style="text-align: right; padding: 3px;">${passTimeInSeconds.toFixed(1)} s</td>
+                        <tr>
+                            <td class="column-length">${cuttingPass.length.toFixed(1)} mm</td>
+                            <td class="column-diameter">${cuttingPass.diameter.toFixed(1)} mm</td>
+                            <td class="column-rotations-per-minute">${cuttingPass.rpm.toFixed(0)}</td>
+                            <td class="column-seconds ${cutTypeClass}">${Math.round(passTimeInSeconds)}</td>
+                            <td class="column-minutes ${cutTypeClass}">${passTimeInMinutes.toFixed(1)}</td>
                         </tr>
                     `;
                 } 
@@ -947,12 +958,39 @@
             tableHtml += `
                     </tbody>
                 </table>
-                <div style="text-align: right; font-weight: bold; color: #ff9500;">
-                    Total: ${totalTimeInSeconds.toFixed(1)} s (${totalTimeInMinutes.toFixed(3)} min)
-                </div>
             `;
 
-            resultElement.innerHTML = tableHtml;
+            const totalTimeInSeconds = roughCutTimeTotal + fineCutTimeTotal;
+
+            function formatTimeWithMinutes(timeInSeconds) {
+                const roundedSeconds = Math.round(timeInSeconds);
+                const minutes = Math.round(timeInSeconds / 60 * 2) / 2;
+                return `${roundedSeconds} s (${minutes.toFixed(1)} min)`;
+            }
+
+            let summaryHtml = '<div class="turning-time__results-summary">';
+            
+            if (fineCuttingEnabled) {
+                summaryHtml += `
+                    <div class="summary-item summary-rough">
+                        <span class="summary-label">Grovbearbetning</span>
+                        <span class="summary-value">${formatTimeWithMinutes(roughCutTimeTotal)}</span>
+                    </div>
+                    <div class="summary-item summary-fine">
+                        <span class="summary-label">Finbearbetning</span>
+                        <span class="summary-value">${formatTimeWithMinutes(fineCutTimeTotal)}</span>
+                    </div>
+                `;
+            }
+            
+            summaryHtml += `
+                <div class="summary-item summary-total">
+                    <span class="summary-label">Total</span>
+                    <span class="summary-value">${formatTimeWithMinutes(totalTimeInSeconds)}</span>
+                </div>
+            </div>`;
+
+            resultElement.innerHTML = tableHtml + summaryHtml;
             resultElement.className = 'result';
         }
 
