@@ -364,16 +364,18 @@
 
 .coordinate-input-row__clear-button {
     height: var(--input-height);
-    font-size: var(--font-size-md);
+    width: var(--input-height);
+    font-size: var(--font-size-lg);
     background-color: var(--secondary-color);
     color: var(--text-color-secondary);
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: background-color 0.2s;
-    padding: 0 var(--spacing-xl);
-    white-space: nowrap;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
         background-color: var(--secondary-color-hover);
@@ -382,16 +384,18 @@
 
 .coordinate-input-row__add-button {
     height: var(--input-height);
-    font-size: var(--font-size-md);
+    width: var(--input-height);
+    font-size: var(--font-size-lg);
     background-color: var(--primary-color);
     color: var(--text-color);
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: background-color 0.2s;
-    padding: 0 var(--spacing-xl);
-    white-space: nowrap;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
         background-color: var(--primary-color-hover);
@@ -428,19 +432,6 @@
 
     .turning-time__preview canvas {
         height: var(--canvas-height-mobile);
-    }
-
-    .coordinate-input-row {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
-        gap: var(--spacing-md);
-
-        .coordinate-input-row__clear-button,
-        .coordinate-input-row__add-button {
-            height: var(--button-height-mobile);
-            font-size: var(--font-size-lg);
-            margin-top: var(--spacing-md);
-        }
     }
 
     .turning-time__results-table {
@@ -483,18 +474,6 @@
             "fine-feed-rate"
             "fine-cut-depth"
             "fine-cutting-speed";
-    }
-
-    .coordinate-input-row {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
-
-        .coordinate-input-row__clear-button,
-        .coordinate-input-row__add-button {
-            height: var(--button-height-mobile);
-            font-size: var(--font-size-lg);
-            margin-top: var(--spacing-sm);
-        }
     }
 
     .turning-time input[type="number"] {
