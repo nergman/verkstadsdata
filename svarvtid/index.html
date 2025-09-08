@@ -26,6 +26,7 @@
                     <input type="text" id="coordinateLength" value="0" placeholder="Ange längd">
                 </div>
 
+                <button class="coordinate-input-row__undo-button" onclick="undoLastCoordinate()">↶</button>
                 <button class="coordinate-input-row__clear-button" onclick="clearCoordinatePath()">×</button>
                 <button class="coordinate-input-row__add-button" onclick="addCoordinate()">+</button>
             </div>
@@ -193,6 +194,11 @@
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
             const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value);
             const lengthValue = parseFloat(document.getElementById('length').value);
+            const undoButton = document.querySelector('.coordinate-input-row__undo-button');
+            
+            if (undoButton) {
+                undoButton.disabled = coordinatesList.length === 0;
+            }
             
             if (isNaN(outerDiameterValue) || isNaN(lengthValue)) return;
             
@@ -642,6 +648,46 @@
             } else {
                 coordinateLengthInput.focus();
                 coordinateLengthInput.select();
+            }
+        }
+
+        function undoLastCoordinate() {
+            const resultElement = document.getElementById('result');
+            
+            if (coordinatesList.length === 0) {
+                return;
+            }
+            
+            coordinatesList.pop();
+            
+            resultElement.textContent = 'Ange värden och klicka Beräkna';
+            resultElement.className = 'result';
+            
+            drawPreviewBackground();
+            
+            const coordinateDiameterInput = document.getElementById('coordinateDiameter');
+            const coordinateLengthInput = document.getElementById('coordinateLength');
+            
+            if (coordinatesList.length >= 2) {
+                const secondLastCoordinate = coordinatesList[coordinatesList.length - 2];
+                const lastCoordinate = coordinatesList[coordinatesList.length - 1];
+                
+                const diameterChanged = Math.abs(lastCoordinate.diameter - secondLastCoordinate.diameter) >= 0.01;
+                const lengthChanged = Math.abs(lastCoordinate.length - secondLastCoordinate.length) >= 0.01;
+                
+                if (diameterChanged && !lengthChanged) {
+                    coordinateLengthInput.focus();
+                    coordinateLengthInput.select();
+                } else if (lengthChanged && !diameterChanged) {
+                    coordinateDiameterInput.focus();
+                    coordinateDiameterInput.select();
+                } else {
+                    coordinateDiameterInput.focus();
+                    coordinateDiameterInput.select();
+                }
+            } else {
+                coordinateDiameterInput.focus();
+                coordinateDiameterInput.select();
             }
         }
 
@@ -1570,6 +1616,9 @@
             } else if (event.key === 'Escape') {
                 event.preventDefault();
                 clearTurningCalculatorInputs();
+            } else if (event.ctrlKey && event.key === 'z') {
+                event.preventDefault();
+                undoLastCoordinate();
             }
         });
     </script>
