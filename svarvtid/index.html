@@ -18,12 +18,12 @@
             <div class="coordinate-input-row">
                 <div class="input-group">
                     <label for="coordinateDiameter">Diameter</label>
-                    <input type="number" id="coordinateDiameter" step="any" placeholder="Ange diameter">
+                    <input type="text" id="coordinateDiameter" placeholder="Ange diameter">
                 </div>
 
                 <div class="input-group">
                     <label for="coordinateLength">Längd</label>
-                    <input type="number" id="coordinateLength" step="any" value="0" placeholder="Ange längd">
+                    <input type="text" id="coordinateLength" value="0" placeholder="Ange längd">
                 </div>
 
                 <button class="coordinate-input-row__clear-button" onclick="clearCoordinatePath()">×</button>
@@ -137,6 +137,54 @@
                 coordinateLengthInput.disabled = true;
                 clearPreviewCanvas();
             }
+        }
+
+        function handleInnerDiameterChange() {
+            const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
+            const previousInnerDiameter = parseFloat(document.getElementById('innerDiameter').dataset.previousValue) || 0;
+            const previousCuttingMode = previousInnerDiameter > 0;
+            const currentCuttingMode = innerDiameterValue > 0;
+            
+            if (window.clearPathTimeout) {
+                clearTimeout(window.clearPathTimeout);
+                window.clearPathTimeout = null;
+            }
+            
+            if (previousCuttingMode !== currentCuttingMode && coordinatesList.length > 0) {
+                if (currentCuttingMode) {
+                    coordinatesList = [];
+                    document.getElementById('coordinateDiameter').value = '';
+                    document.getElementById('coordinateLength').value = '0';
+                    
+                    const resultElement = document.getElementById('result');
+                    resultElement.textContent = 'Ange värden och klicka Beräkna';
+                    resultElement.className = 'result';
+                    
+                    drawPreviewBackground();
+                } else {
+                    window.clearPathTimeout = setTimeout(() => {
+                        const finalInnerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
+                        const finalCuttingMode = finalInnerDiameterValue > 0;
+                        
+                        if (previousCuttingMode !== finalCuttingMode) {
+                            coordinatesList = [];
+                            document.getElementById('coordinateDiameter').value = '';
+                            document.getElementById('coordinateLength').value = '0';
+                            
+                            const resultElement = document.getElementById('result');
+                            resultElement.textContent = 'Ange värden och klicka Beräkna';
+                            resultElement.className = 'result';
+                            
+                            drawPreviewBackground();
+                        }
+                        
+                        window.clearPathTimeout = null;
+                    }, 2000);
+                }
+            }
+            
+            document.getElementById('innerDiameter').dataset.previousValue = innerDiameterValue.toString();
+            drawPreviewBackground();
         }
 
         function drawPreviewBackground() {
@@ -461,33 +509,139 @@
         }
 
         function addCoordinate() {
-            const diameterValue = parseFloat(document.getElementById('coordinateDiameter').value);
-            const lengthValue = parseFloat(document.getElementById('coordinateLength').value);
+            const diameterInput = document.getElementById('coordinateDiameter').value;
+            const lengthInput = document.getElementById('coordinateLength').value;
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
             const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
             const maximumLengthValue = parseFloat(document.getElementById('length').value);
+            const isInternalCutting = innerDiameterValue > 0;
+            const resultElement = document.getElementById('result');
+
+            let diameterValue, lengthValue;
+            let diameterWasIncremental = false;
+            let lengthWasIncremental = false;
+            
+            if (diameterInput.startsWith('+') && coordinatesList.length > 0) {
+                const incrementValue = parseFloat(diameterInput.substring(1));
+                if (isNaN(incrementValue)) {
+                    resultElement.textContent = 'Ogiltigt diameterinkrement';
+                    resultElement.className = 'result error';
+                    return;
+                }
+                diameterValue = coordinatesList[coordinatesList.length - 1].diameter + incrementValue;
+                diameterWasIncremental = true;
+            } else {
+                diameterValue = parseFloat(diameterInput);
+            }
+            
+            if (lengthInput.startsWith('+') && coordinatesList.length > 0) {
+                const incrementValue = parseFloat(lengthInput.substring(1));
+                if (isNaN(incrementValue)) {
+                    resultElement.textContent = 'Ogiltigt längdinkrement';
+                    resultElement.className = 'result error';
+                    return;
+                }
+                lengthValue = coordinatesList[coordinatesList.length - 1].length + incrementValue;
+                lengthWasIncremental = true;
+            } else {
+                lengthValue = parseFloat(lengthInput);
+            }
 
             if (isNaN(diameterValue) || isNaN(lengthValue) || isNaN(outerDiameterValue) || isNaN(maximumLengthValue)) {
+                resultElement.textContent = 'Ogiltiga koordinatvärden';
+                resultElement.className = 'result error';
                 return;
             }
 
-            if (diameterValue > outerDiameterValue || diameterValue < innerDiameterValue || lengthValue > maximumLengthValue) {
+            if (diameterValue > outerDiameterValue) {
+                resultElement.textContent = 'Diameter får inte vara större än ytterdiameter';
+                resultElement.className = 'result error';
                 return;
             }
 
-            const activeElement = document.activeElement;
+            if (diameterValue < innerDiameterValue) {
+                resultElement.textContent = 'Diameter får inte vara mindre än innerdiameter';
+                resultElement.className = 'result error';
+                return;
+            }
+
+            if (lengthValue > maximumLengthValue) {
+                resultElement.textContent = 'Längd får inte vara större än maxlängd';
+                resultElement.className = 'result error';
+                return;
+            }
+
+            if (coordinatesList.length > 0) {
+                const lastCoordinate = coordinatesList[coordinatesList.length - 1];
+                
+                if (lengthValue < lastCoordinate.length) {
+                    resultElement.textContent = `Längd måste vara större eller lika med föregående koordinat (senaste: ${lastCoordinate.length})`;
+                    resultElement.className = 'result error';
+                    return;
+                }
+                
+                if (isInternalCutting) {
+                    if (diameterValue > lastCoordinate.diameter) {
+                        resultElement.textContent = `Vid innerbearbetning måste diameter vara mindre eller lika med föregående (senaste: ${lastCoordinate.diameter})`;
+                        resultElement.className = 'result error';
+                        return;
+                    }
+                } else {
+                    if (diameterValue < lastCoordinate.diameter) {
+                        resultElement.textContent = `Vid ytterbearbetning måste diameter vara större eller lika med föregående (senaste: ${lastCoordinate.diameter})`;
+                        resultElement.className = 'result error';
+                        return;
+                    }
+                }
+
+                const diameterMatches = Math.abs(diameterValue - lastCoordinate.diameter) < 0.01;
+                const lengthMatches = Math.abs(lengthValue - lastCoordinate.length) < 0.01;
+                
+                if (!diameterMatches && !lengthMatches) {
+                    resultElement.textContent = `Minst en koordinat måste vara samma som föregående (diameter: ${lastCoordinate.diameter}, längd: ${lastCoordinate.length})`;
+                    resultElement.className = 'result error';
+                    return;
+                }
+            }
+
             const coordinateDiameterInput = document.getElementById('coordinateDiameter');
             const coordinateLengthInput = document.getElementById('coordinateLength');
 
             coordinatesList.push({ diameter: diameterValue, length: lengthValue });
+            
+            if (diameterWasIncremental) {
+                coordinateDiameterInput.value = diameterValue.toString();
+            }
+            
+            if (lengthWasIncremental) {
+                coordinateLengthInput.value = lengthValue.toString();
+            }
+
+            resultElement.textContent = 'Ange värden och klicka Beräkna';
+            resultElement.className = 'result';
+            
             drawPreviewBackground();
 
-            if (activeElement && activeElement.id === 'coordinateDiameter') {
+            if (coordinatesList.length >= 2) {
+                const secondLastCoordinate = coordinatesList[coordinatesList.length - 2];
+                const lastCoordinate = coordinatesList[coordinatesList.length - 1];
+                
+                const diameterChanged = Math.abs(lastCoordinate.diameter - secondLastCoordinate.diameter) >= 0.01;
+                const lengthChanged = Math.abs(lastCoordinate.length - secondLastCoordinate.length) >= 0.01;
+                
+                if (diameterChanged && !lengthChanged) {
+                    coordinateLengthInput.focus();
+                    coordinateLengthInput.select();
+                } else if (lengthChanged && !diameterChanged) {
+                    coordinateDiameterInput.focus();
+                    coordinateDiameterInput.select();
+                } else {
+                    coordinateDiameterInput.focus();
+                    coordinateDiameterInput.select();
+                }
+            } else {
                 coordinateLengthInput.focus();
                 coordinateLengthInput.select();
-            } else {
-                coordinateDiameterInput.focus();
-                coordinateDiameterInput.select();
             }
         }
 
@@ -784,9 +938,15 @@
         }
 
         function clearCoordinatePath() {
+            const resultElement = document.getElementById('result');
+            
             coordinatesList = [];
             document.getElementById('coordinateDiameter').value = '';
             document.getElementById('coordinateLength').value = '0';
+            
+            resultElement.textContent = 'Ange värden och klicka Beräkna';
+            resultElement.className = 'result';
+            
             clearPreviewCanvas();
             drawPreviewBackground();
         }
@@ -812,61 +972,404 @@
         }
 
         function addCoordinate() {
-            const diameterValue = parseFloat(document.getElementById('coordinateDiameter').value);
-            const lengthValue = parseFloat(document.getElementById('coordinateLength').value);
+            const diameterInput = document.getElementById('coordinateDiameter').value;
+            const lengthInput = document.getElementById('coordinateLength').value;
             const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
             const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
             const maximumLengthValue = parseFloat(document.getElementById('length').value);
+            const isInternalCutting = innerDiameterValue > 0;
+            const resultElement = document.getElementById('result');
+
+            let diameterValue, lengthValue;
+            let diameterWasIncremental = false;
+            let lengthWasIncremental = false;
+            
+            if (diameterInput.startsWith('+') && coordinatesList.length > 0) {
+                const incrementValue = parseFloat(diameterInput.substring(1));
+                if (isNaN(incrementValue)) {
+                    resultElement.textContent = 'Ogiltigt diameterinkrement';
+                    resultElement.className = 'result error';
+                    return;
+                }
+                diameterValue = coordinatesList[coordinatesList.length - 1].diameter + incrementValue;
+                diameterWasIncremental = true;
+            } else {
+                diameterValue = parseFloat(diameterInput);
+            }
+            
+            if (lengthInput.startsWith('+') && coordinatesList.length > 0) {
+                const incrementValue = parseFloat(lengthInput.substring(1));
+                if (isNaN(incrementValue)) {
+                    resultElement.textContent = 'Ogiltigt längdinkrement';
+                    resultElement.className = 'result error';
+                    return;
+                }
+                lengthValue = coordinatesList[coordinatesList.length - 1].length + incrementValue;
+                lengthWasIncremental = true;
+            } else {
+                lengthValue = parseFloat(lengthInput);
+            }
 
             if (isNaN(diameterValue) || isNaN(lengthValue) || isNaN(outerDiameterValue) || isNaN(maximumLengthValue)) {
+                resultElement.textContent = 'Ogiltiga koordinatvärden';
+                resultElement.className = 'result error';
                 return;
             }
 
-            if (diameterValue > outerDiameterValue || diameterValue < innerDiameterValue || lengthValue > maximumLengthValue) {
+            if (diameterValue > outerDiameterValue) {
+                resultElement.textContent = 'Diameter får inte vara större än ytterdiameter';
+                resultElement.className = 'result error';
                 return;
             }
 
-            const activeElement = document.activeElement;
+            if (diameterValue < innerDiameterValue) {
+                resultElement.textContent = 'Diameter får inte vara mindre än innerdiameter';
+                resultElement.className = 'result error';
+                return;
+            }
+
+            if (lengthValue > maximumLengthValue) {
+                resultElement.textContent = 'Längd får inte vara större än maxlängd';
+                resultElement.className = 'result error';
+                return;
+            }
+
+            if (coordinatesList.length > 0) {
+                const lastCoordinate = coordinatesList[coordinatesList.length - 1];
+                
+                if (lengthValue < lastCoordinate.length) {
+                    resultElement.textContent = `Längd måste vara större eller lika med föregående koordinat (senaste: ${lastCoordinate.length})`;
+                    resultElement.className = 'result error';
+                    return;
+                }
+                
+                if (isInternalCutting) {
+                    if (diameterValue > lastCoordinate.diameter) {
+                        resultElement.textContent = `Vid innerbearbetning måste diameter vara mindre eller lika med föregående (senaste: ${lastCoordinate.diameter})`;
+                        resultElement.className = 'result error';
+                        return;
+                    }
+                } else {
+                    if (diameterValue < lastCoordinate.diameter) {
+                        resultElement.textContent = `Vid ytterbearbetning måste diameter vara större eller lika med föregående (senaste: ${lastCoordinate.diameter})`;
+                        resultElement.className = 'result error';
+                        return;
+                    }
+                }
+
+                const diameterMatches = Math.abs(diameterValue - lastCoordinate.diameter) < 0.01;
+                const lengthMatches = Math.abs(lengthValue - lastCoordinate.length) < 0.01;
+                
+                if (!diameterMatches && !lengthMatches) {
+                    resultElement.textContent = `Minst en koordinat måste vara samma som föregående (diameter: ${lastCoordinate.diameter}, längd: ${lastCoordinate.length})`;
+                    resultElement.className = 'result error';
+                    return;
+                }
+            }
+
             const coordinateDiameterInput = document.getElementById('coordinateDiameter');
             const coordinateLengthInput = document.getElementById('coordinateLength');
 
             coordinatesList.push({ diameter: diameterValue, length: lengthValue });
+            
+            if (diameterWasIncremental) {
+                coordinateDiameterInput.value = diameterValue.toString();
+            }
+            
+            if (lengthWasIncremental) {
+                coordinateLengthInput.value = lengthValue.toString();
+            }
+
+            resultElement.textContent = 'Ange värden och klicka Beräkna';
+            resultElement.className = 'result';
+            
             drawPreviewBackground();
 
-            if (activeElement && activeElement.id === 'coordinateDiameter') {
+            if (coordinatesList.length >= 2) {
+                const secondLastCoordinate = coordinatesList[coordinatesList.length - 2];
+                const lastCoordinate = coordinatesList[coordinatesList.length - 1];
+                
+                const diameterChanged = Math.abs(lastCoordinate.diameter - secondLastCoordinate.diameter) >= 0.01;
+                const lengthChanged = Math.abs(lastCoordinate.length - secondLastCoordinate.length) >= 0.01;
+                
+                if (diameterChanged && !lengthChanged) {
+                    coordinateLengthInput.focus();
+                    coordinateLengthInput.select();
+                } else if (lengthChanged && !diameterChanged) {
+                    coordinateDiameterInput.focus();
+                    coordinateDiameterInput.select();
+                } else {
+                    coordinateDiameterInput.focus();
+                    coordinateDiameterInput.select();
+                }
+            } else {
                 coordinateLengthInput.focus();
                 coordinateLengthInput.select();
-            } else {
-                coordinateDiameterInput.focus();
-                coordinateDiameterInput.select();
             }
         }
 
-        function getMinimumDiameterAtLength(targetLength) {
-            if (coordinatesList.length < 2) return 0;
+        function calculateTurningTime() {
+            if (coordinatesList.length < 2) {
+                return { error: 'Minst två koordinater med olika längdvärden krävs för beräkning' };
+            }
 
-            for (let segmentIndex = 1; segmentIndex < coordinatesList.length; segmentIndex++) {
-                const previousCoordinate = coordinatesList[segmentIndex - 1];
-                const currentCoordinate = coordinatesList[segmentIndex];
+            const roughCuttingEnabled = document.getElementById('enableRoughCutting').checked;
+            const fineCuttingEnabled = document.getElementById('enableFineCutting').checked;
+
+            if (!roughCuttingEnabled && !fineCuttingEnabled) {
+                return { error: 'Minst en typ av bearbetning måste vara aktiverad' };
+            }
+
+            const feedRateValue = parseFloat(document.getElementById('feedRate').value);
+            const cutDepthValue = parseFloat(document.getElementById('cutDepth').value);
+            const cuttingSpeedValue = parseFloat(document.getElementById('cuttingSpeed').value);
+            const fineFeedRateValue = parseFloat(document.getElementById('fineFeedRate').value);
+            const fineCutDepthValue = parseFloat(document.getElementById('fineCutDepth').value);
+            const fineCuttingSpeedValue = parseFloat(document.getElementById('fineCuttingSpeed').value);
+            const maximumRotationsPerMinuteValue = parseFloat(document.getElementById('maximumRotationsPerMinute').value);
+
+            if (roughCuttingEnabled && (isNaN(feedRateValue) || isNaN(cutDepthValue) || isNaN(cuttingSpeedValue))) {
+                return { error: 'Ogiltiga skärdata för grovbearbetning' };
+            }
+
+            if (fineCuttingEnabled && (isNaN(fineFeedRateValue) || isNaN(fineCutDepthValue) || isNaN(fineCuttingSpeedValue))) {
+                return { error: 'Ogiltiga skärdata för finbearbetning' };
+            }
+
+            if (isNaN(maximumRotationsPerMinuteValue)) {
+                return { error: 'Ogiltig varvtalsbegränsning' };
+            }
+
+            const hasLengthVariation = coordinatesList.some((coordinate, index) => 
+                index > 0 && coordinate.length !== coordinatesList[0].length
+            );
+
+            if (!hasLengthVariation) {
+                return { error: 'Koordinater måste ha olika längdvärden' };
+            }
+
+            const outerDiameterValue = parseFloat(document.getElementById('outerDiameter').value);
+            const innerDiameterValue = parseFloat(document.getElementById('innerDiameter').value) || 0;
+            const lengthValue = parseFloat(document.getElementById('length').value);
+            const adjustedCoordinates = getAdjustedCoordinatesForRoughCutting();
+            const isInternalCutting = innerDiameterValue > 0;
+            
+            let minimumRoughDiameter, maximumRoughDiameter, uniqueRoughPathDiameters;
+            
+            if (isInternalCutting) {
+                minimumRoughDiameter = Math.min(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+                maximumRoughDiameter = Math.max(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+            } else {
+                minimumRoughDiameter = Math.min(...adjustedCoordinates.map(coordinate => coordinate.diameter));
+            }
+            
+            const minimumFineDiameter = Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
+            const maximumFineDiameter = Math.max(...coordinatesList.map(coordinate => coordinate.diameter));
+            uniqueRoughPathDiameters = [...new Set(adjustedCoordinates.map(coordinate => coordinate.diameter))].sort((a, b) => b - a);
+            
+            let totalMachiningTime = 0;
+            const cuttingPassDetails = [];
+
+            if (roughCuttingEnabled) {
+                let currentCutDiameter;
                 
-                const minimumLength = Math.min(previousCoordinate.length, currentCoordinate.length);
-                const maximumLength = Math.max(previousCoordinate.length, currentCoordinate.length);
-                
-                if (targetLength >= minimumLength && targetLength <= maximumLength) {
-                    const lengthRatio = (targetLength - previousCoordinate.length) / (currentCoordinate.length - previousCoordinate.length);
-                    return previousCoordinate.diameter + lengthRatio * (currentCoordinate.diameter - previousCoordinate.diameter);
+                if (isInternalCutting) {
+                    currentCutDiameter = innerDiameterValue + (cutDepthValue * 2);
+                    
+                    while (currentCutDiameter <= maximumRoughDiameter) {
+                        const calculatedRotationsPerMinute = (cuttingSpeedValue / currentCutDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const cuttableLength = calculateCuttableLengthForDiameterInternal(currentCutDiameter, lengthValue, true);
+                        
+                        const revolutionsRequired = cuttableLength / feedRateValue;
+                        const passTime = revolutionsRequired / revolutionsPerMinute;
+
+                        cuttingPassDetails.push({
+                            diameter: currentCutDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: cuttableLength,
+                            time: passTime,
+                            operation: 'cutting',
+                            cuttingType: 'rough'
+                        });
+
+                        totalMachiningTime += passTime;
+
+                        if (currentCutDiameter === maximumRoughDiameter) {
+                            break;
+                        }
+
+                        const remainingMaterial = maximumRoughDiameter - currentCutDiameter;
+                        const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
+                        let nextCutDiameter = currentCutDiameter + nextCutDepth;
+                        
+                        if (nextCutDiameter > maximumRoughDiameter) {
+                            nextCutDiameter = maximumRoughDiameter;
+                        }
+
+                        currentCutDiameter = nextCutDiameter;
+
+                        const pathDiametersInRange = uniqueRoughPathDiameters.filter(pathDiameter => 
+                            pathDiameter > currentCutDiameter - nextCutDepth && pathDiameter < currentCutDiameter
+                        );
+
+                        for (const pathDiameter of pathDiametersInRange) {
+                            const coordinatesAtPathDiameter = adjustedCoordinates.filter(coordinate => 
+                                Math.abs(coordinate.diameter - pathDiameter) < 0.1
+                            );
+
+                            if (coordinatesAtPathDiameter.length >= 2) {
+                                const startLength = Math.min(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const endLength = Math.max(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const pathCuttingLength = endLength - startLength;
+                                
+                                if (pathCuttingLength > 0) {
+                                    const calculatedPathRotationsPerMinute = (cuttingSpeedValue / pathDiameter) * 318;
+                                    const pathRevolutionsPerMinute = Math.min(calculatedPathRotationsPerMinute, maximumRotationsPerMinuteValue);
+                                    const pathRevolutionsRequired = pathCuttingLength / feedRateValue;
+                                    const pathCuttingTime = pathRevolutionsRequired / pathRevolutionsPerMinute;
+
+                                    cuttingPassDetails.push({
+                                        diameter: pathDiameter,
+                                        rpm: pathRevolutionsPerMinute,
+                                        length: pathCuttingLength,
+                                        time: pathCuttingTime,
+                                        operation: 'cutting',
+                                        cuttingType: 'rough'
+                                    });
+
+                                    totalMachiningTime += pathCuttingTime;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    currentCutDiameter = outerDiameterValue - (cutDepthValue * 2);
+
+                    while (currentCutDiameter >= minimumRoughDiameter) {
+                        const calculatedRotationsPerMinute = (cuttingSpeedValue / currentCutDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const cuttableLength = calculateCuttableLengthForDiameter(currentCutDiameter, lengthValue, true);
+                        
+                        const revolutionsRequired = cuttableLength / feedRateValue;
+                        const passTime = revolutionsRequired / revolutionsPerMinute;
+
+                        cuttingPassDetails.push({
+                            diameter: currentCutDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: cuttableLength,
+                            time: passTime,
+                            operation: 'cutting',
+                            cuttingType: 'rough'
+                        });
+
+                        totalMachiningTime += passTime;
+
+                        if (currentCutDiameter === minimumRoughDiameter) {
+                            break;
+                        }
+
+                        const remainingMaterial = currentCutDiameter - minimumRoughDiameter;
+                        const nextCutDepth = Math.min(cutDepthValue * 2, remainingMaterial);
+                        let nextCutDiameter = currentCutDiameter - nextCutDepth;
+                        
+                        if (nextCutDiameter < minimumRoughDiameter) {
+                            nextCutDiameter = minimumRoughDiameter;
+                        }
+
+                        currentCutDiameter = nextCutDiameter;
+
+                        const pathDiametersInRange = uniqueRoughPathDiameters.filter(pathDiameter => 
+                            pathDiameter < currentCutDiameter + nextCutDepth && pathDiameter > currentCutDiameter
+                        );
+
+                        for (const pathDiameter of pathDiametersInRange) {
+                            const coordinatesAtPathDiameter = adjustedCoordinates.filter(coordinate => 
+                                Math.abs(coordinate.diameter - pathDiameter) < 0.1
+                            );
+
+                            if (coordinatesAtPathDiameter.length >= 2) {
+                                const startLength = Math.min(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const endLength = Math.max(...coordinatesAtPathDiameter.map(coordinate => coordinate.length));
+                                const pathCuttingLength = endLength - startLength;
+                                
+                                if (pathCuttingLength > 0) {
+                                    const calculatedPathRotationsPerMinute = (cuttingSpeedValue / pathDiameter) * 318;
+                                    const pathRevolutionsPerMinute = Math.min(calculatedPathRotationsPerMinute, maximumRotationsPerMinuteValue);
+                                    const pathRevolutionsRequired = pathCuttingLength / feedRateValue;
+                                    const pathCuttingTime = pathRevolutionsRequired / pathRevolutionsPerMinute;
+
+                                    cuttingPassDetails.push({
+                                        diameter: pathDiameter,
+                                        rpm: pathRevolutionsPerMinute,
+                                        length: pathCuttingLength,
+                                        time: pathCuttingTime,
+                                        operation: 'cutting',
+                                        cuttingType: 'rough'
+                                    });
+
+                                    totalMachiningTime += pathCuttingTime;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            if (targetLength < coordinatesList[0].length) {
-                return coordinatesList[0].diameter;
-            }
-            
-            if (targetLength > coordinatesList[coordinatesList.length - 1].length) {
-                return coordinatesList[coordinatesList.length - 1].diameter;
+            if (fineCuttingEnabled) {
+                for (let coordinateIndex = 1; coordinateIndex < coordinatesList.length; coordinateIndex++) {
+                    const previousCoordinate = coordinatesList[coordinateIndex - 1];
+                    const currentCoordinate = coordinatesList[coordinateIndex];
+                    
+                    const startDiameter = previousCoordinate.diameter;
+                    const endDiameter = currentCoordinate.diameter;
+                    const startLength = previousCoordinate.length;
+                    const endLength = currentCoordinate.length;
+                    
+                    if (startLength === endLength && startDiameter !== endDiameter) {
+                        const medianDiameter = (startDiameter + endDiameter) / 2;
+                        const traversalDistance = Math.abs(endDiameter - startDiameter) / 2;
+                        const calculatedRotationsPerMinute = (fineCuttingSpeedValue / medianDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const revolutionsRequired = traversalDistance / fineFeedRateValue;
+                        const traversalTime = revolutionsRequired / revolutionsPerMinute;
+                        
+                        cuttingPassDetails.push({
+                            diameter: medianDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: traversalDistance,
+                            time: traversalTime,
+                            operation: 'cutting',
+                            cuttingType: 'fine'
+                        });
+                        
+                        totalMachiningTime += traversalTime;
+                    } else if (startLength !== endLength) {
+                        const segmentLength = Math.abs(endLength - startLength);
+                        const medianDiameter = (startDiameter + endDiameter) / 2;
+                        const calculatedRotationsPerMinute = (fineCuttingSpeedValue / medianDiameter) * 318;
+                        const revolutionsPerMinute = Math.min(calculatedRotationsPerMinute, maximumRotationsPerMinuteValue);
+                        const revolutionsRequired = segmentLength / fineFeedRateValue;
+                        const segmentTime = revolutionsRequired / revolutionsPerMinute;
+                        
+                        cuttingPassDetails.push({
+                            diameter: medianDiameter,
+                            rpm: revolutionsPerMinute,
+                            length: segmentLength,
+                            time: segmentTime,
+                            operation: 'cutting',
+                            cuttingType: 'fine'
+                        });
+                        
+                        totalMachiningTime += segmentTime;
+                    }
+                }
             }
 
-            return Math.min(...coordinatesList.map(coordinate => coordinate.diameter));
+            return { 
+                time: totalMachiningTime,
+                cuttingPasses: cuttingPassDetails
+            };
         }
 
         function performTurningTimeCalculation() {
@@ -875,13 +1378,35 @@
             const lengthValue = parseFloat(document.getElementById('length').value);
             const maximumRotationsPerMinuteValue = parseFloat(document.getElementById('maximumRotationsPerMinute').value);
             const fineCuttingEnabled = document.getElementById('enableFineCutting').checked;
-            
             const resultElement = document.getElementById('result');
+            const isInternalCutting = innerDiameterValue > 0;
             
             if (isNaN(outerDiameterValue) || isNaN(lengthValue) || isNaN(maximumRotationsPerMinuteValue)) {
                 resultElement.textContent = 'Vänligen ange giltiga värden för obligatoriska fält';
                 resultElement.className = 'result error';
                 return;
+            }
+
+            if (coordinatesList.length > 0) {
+                const lastCoordinate = coordinatesList[coordinatesList.length - 1];
+                
+                if (isInternalCutting) {
+                    if (lastCoordinate.length < lengthValue && lastCoordinate.diameter > innerDiameterValue) {
+                        coordinatesList.push({
+                            diameter: innerDiameterValue,
+                            length: lastCoordinate.length
+                        });
+                        drawPreviewBackground();
+                    }
+                } else {
+                    if (lastCoordinate.length < lengthValue && lastCoordinate.diameter < outerDiameterValue) {
+                        coordinatesList.push({
+                            diameter: outerDiameterValue,
+                            length: lastCoordinate.length
+                        });
+                        drawPreviewBackground();
+                    }
+                }
             }
 
             const turningTimeResult = calculateTurningTime();
@@ -945,8 +1470,8 @@
                     
                     tableHtml += `
                         <tr>
-                            <td class="column-length">${cuttingPass.length.toFixed(1)}</td>
-                            <td class="column-diameter">${cuttingPass.diameter.toFixed(1)}</td>
+                            <td class="column-length">${cuttingPass.length.toFixed(1)} mm</td>
+                            <td class="column-diameter">${cuttingPass.diameter.toFixed(1)} mm</td>
                             <td class="column-rotations-per-minute">${cuttingPass.rpm.toFixed(0)}</td>
                             <td class="column-seconds ${cutTypeClass}">${Math.round(passTimeInSeconds)}</td>
                             <td class="column-minutes ${cutTypeClass}">${passTimeInMinutes.toFixed(1)}</td>
@@ -994,14 +1519,10 @@
             resultElement.className = 'result';
         }
 
-        function clearCoordinateInputs() {
-            document.getElementById('coordinateDiameter').value = '';
-            document.getElementById('coordinateLength').value = '0';
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
             const outerDiameterInput = document.getElementById('outerDiameter');
             const lengthInput = document.getElementById('length');
+            const innerDiameterInput = document.getElementById('innerDiameter');
             const enableRoughCuttingSwitch = document.getElementById('enableRoughCutting');
             const enableFineCuttingSwitch = document.getElementById('enableFineCutting');
             const coordinateDiameterInput = document.getElementById('coordinateDiameter');
@@ -1009,6 +1530,7 @@
             
             outerDiameterInput.addEventListener('input', updateCoordinateLengthState);
             lengthInput.addEventListener('input', updateCoordinateLengthState);
+            innerDiameterInput.addEventListener('input', handleInnerDiameterChange);
             enableRoughCuttingSwitch.addEventListener('change', updateRoughCuttingInputVisibility);
             enableFineCuttingSwitch.addEventListener('change', updateFineCuttingInputVisibility);
             
@@ -1025,6 +1547,8 @@
                     addCoordinate();
                 }
             });
+            
+            innerDiameterInput.dataset.previousValue = '0';
             
             updateCoordinateLengthState();
             updateRoughCuttingInputVisibility();
