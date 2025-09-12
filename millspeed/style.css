@@ -1,29 +1,13 @@
 @import url('../style.css');
 
-:root {
-    --primary-color: #ff9500;
-    --primary-color-hover: #e68400;
-    --secondary-color: #a6a6a6;
-    --secondary-color-hover: #999;
-    --text-color: #ffffff;
-    --text-color-secondary: #000000;
-    --border-color: #666;
-    --border-color-light: #333;
-    --background-dark: #111;
-    --background-calculator: #1a1a1a;
-    
-    --spacing-xs: 3px;
-    --spacing-sm: 5px;
-    --spacing-md: 10px;
-    --spacing-lg: 15px;
-    --spacing-xl: 20px;
-    
-    --font-size-sm: 12px;
-    --font-size-md: 16px;
-    --font-size-lg: 18px;
-    
-    --border-radius: 5px;
-    --input-height: 44px;
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .milling-calculator {
@@ -36,6 +20,7 @@
     background-color: var(--background-calculator);
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
+    box-sizing: border-box;
 
     input[type="number"], select {
         background-color: var(--background-dark);
@@ -89,84 +74,119 @@
     grid-column: 1 / -1;
 }
 
+.tool-diameter-group {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.number-of-teeth-group {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.speed-group {
+    grid-column: 1;
+    grid-row: 3;
+}
+
+.feed-group {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.input-content {
+    display: flex;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+}
+
+.toggle-switch {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    height: var(--input-height);
+    min-width: 50px;
+
+    input[type="radio"] {
+        display: none;
+    }
+
+    label {
+        padding: var(--spacing-sm) var(--spacing-sm);
+        background-color: transparent;
+        color: var(--text-color);
+        font-size: var(--font-size-sm);
+        font-weight: normal;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin: 0;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        flex: 1;
+    }
+
+    input[type="radio"]:checked + label {
+        background-color: var(--primary-color);
+        color: var(--text-color);
+    }
+
+    label:hover {
+        background-color: rgba(255, 149, 0, 0.1);
+    }
+}
+
+.input-with-result {
+    flex: 1;
+}
+
+.result-display {
+    text-align: right;
+    color: var(--primary-color);
+    font-size: var(--font-size-sm);
+    font-weight: bold;
+    margin-top: var(--spacing-xs);
+    min-height: calc(var(--font-size-sm) * 1.2);
+    padding-right: var(--spacing-md);
+}
+
 .milling-calculator__inputs {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
 }
 
-.milling-calculator__controls {
+.tool-select-row {
     display: flex;
     gap: var(--spacing-md);
-    justify-content: center;
+    align-items: stretch;
 }
 
-.calculate-button {
+.tool-select-row select {
     flex: 1;
-    padding: var(--spacing-lg);
-    font-size: var(--font-size-lg);
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-        background-color: var(--primary-color-hover);
-    }
 }
 
-.clear-button {
-    flex: 1;
-    padding: var(--spacing-lg);
-    font-size: var(--font-size-lg);
+.tool-select-row .clear-button {
+    flex: 0 0 auto;
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-md);
     background-color: var(--secondary-color);
     color: var(--text-color-secondary);
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: background-color 0.2s;
+    height: var(--input-height);
+    white-space: nowrap;
 
     &:hover {
         background-color: var(--secondary-color-hover);
     }
-}
-
-.results {
-    padding: var(--spacing-lg);
-    background-color: var(--background-dark);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-    font-size: var(--font-size-md);
-    text-align: center;
-
-    &.error {
-        background-color: rgba(220, 38, 38, 0.1);
-        border-color: #dc2626;
-        color: #fca5a5;
-    }
-}
-
-.result-item {
-    display: flex;
-    justify-content: space-between;
-    padding: var(--spacing-sm) 0;
-    border-bottom: 1px solid var(--border-color-light);
-
-    &:last-child {
-        border-bottom: none;
-    }
-}
-
-.result-label {
-    font-weight: bold;
-}
-
-.result-value {
-    color: var(--primary-color);
-    font-weight: bold;
 }
 
 .milling-calculator__material-guide {
@@ -212,27 +232,30 @@
         padding: var(--spacing-lg);
     }
 
-    .milling-calculator__inputs {
-        grid-template-columns: 1fr;
-    }
-
-    .milling-calculator__controls {
-        flex-direction: column;
-    }
-
     .material-grid {
         grid-template-columns: 1fr;
+    }
+
+    .milling-calculator__inputs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tool-select-group {
+        grid-column: 1 / -1;
     }
 }
 
 @media (max-width: 480px) {
     .milling-calculator {
-        margin: var(--spacing-sm);
+        margin: var(--spacing-xs);
         padding: var(--spacing-md);
     }
 
-    .milling-calculator input[type="number"], .milling-calculator select {
-        font-size: var(--font-size-lg);
-        padding: var(--spacing-md);
+    .toggle-switch {
+        min-width: 45px;
+    }
+
+    .toggle-switch label {
+        padding: var(--spacing-xs) var(--spacing-xs);
     }
 }

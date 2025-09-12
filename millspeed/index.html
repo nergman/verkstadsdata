@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fräshastighetskalkylatorn</title>
+    <title>Fräshastighets- kalkylatorn</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,47 +11,65 @@
         <a href="../">← Tillbaka till huvudsidan</a>
     </div>
 
-    <h1>Fräshastighetskalkylatorn</h1>
+    <h1>Fräshastighets- kalkylatorn</h1>
 
     <div class="milling-calculator">
         <div class="milling-calculator__inputs">
             <div class="input-group tool-select-group">
                 <label for="toolSelect">Verktyg</label>
-                <select id="toolSelect" onchange="handleToolSelection()">
-                    <option value="">Välj verktyg...</option>
-                    <option value="save">Spara verktyg...</option>
-                </select>
+                <div class="tool-select-row">
+                    <select id="toolSelect" onchange="handleToolSelection()">
+                        <option value="">Välj verktyg...</option>
+                        <option value="save">Spara verktyg...</option>
+                    </select>
+                    <button class="clear-button" onclick="clearInputs()">Rensa</button>
+                </div>
             </div>
 
-            <div class="input-group">
-                <label for="toolDiameter">Verktygsdiameter (mm)</label>
-                <input type="number" id="toolDiameter" step="any" placeholder="Ange verktygsdiameter">
+            <div class="input-group tool-diameter-group">
+                <label for="toolDiameter">Diameter</label>
+                <input type="number" id="toolDiameter" step="any" placeholder="Ange verktygsdiameter" oninput="calculateInRealTime()">
             </div>
 
-            <div class="input-group">
+            <div class="input-group number-of-teeth-group">
                 <label for="numberOfTeeth">Antal skär</label>
-                <input type="number" id="numberOfTeeth" step="1" min="1" placeholder="Ange antal skär">
+                <input type="number" id="numberOfTeeth" step="1" min="1" placeholder="Ange antal skär" oninput="calculateInRealTime()">
             </div>
 
-            <div class="input-group">
-                <label for="cuttingSpeed">Skärhastighet (m/min)</label>
-                <input type="number" id="cuttingSpeed" step="any" placeholder="Ange skärhastighet">
+            <div class="input-group speed-group">
+                <div class="input-header">
+                    <label>Hastighet</label>
+                </div>
+                <div class="input-content">
+                    <div class="toggle-switch">
+                        <input type="radio" id="speedModeCutting" name="speedMode" value="cutting" checked onchange="handleSpeedModeChange()">
+                        <label for="speedModeCutting">m/min</label>
+                        <input type="radio" id="speedModeRpm" name="speedMode" value="rpm" onchange="handleSpeedModeChange()">
+                        <label for="speedModeRpm">RPM</label>
+                    </div>
+                    <div class="input-with-result">
+                        <input type="number" id="speedInput" step="any" placeholder="Ange skärhastighet" oninput="calculateInRealTime()">
+                        <div id="speedResult" class="result-display"></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="input-group">
-                <label for="feedPerTooth">Matning per skär (mm/skär)</label>
-                <input type="number" id="feedPerTooth" step="any" placeholder="Ange matning per skär">
-            </div>
-        </div>
-
-        <div class="milling-calculator__controls">
-            <button class="calculate-button" onclick="calculateMillingParameters()">Beräkna</button>
-            <button class="clear-button" onclick="clearInputs()">Rensa</button>
-        </div>
-
-        <div class="milling-calculator__results">
-            <div id="results" class="results">
-                Ange värden och klicka Beräkna
+            <div class="input-group feed-group">
+                <div class="input-header">
+                    <label>Matning</label>
+                </div>
+                <div class="input-content">
+                    <div class="toggle-switch">
+                        <input type="radio" id="feedModePerTooth" name="feedMode" value="perTooth" checked onchange="handleFeedModeChange()">
+                        <label for="feedModePerTooth">mm/skär</label>
+                        <input type="radio" id="feedModePerMinute" name="feedMode" value="perMinute" onchange="handleFeedModeChange()">
+                        <label for="feedModePerMinute">mm/min</label>
+                    </div>
+                    <div class="input-with-result">
+                        <input type="number" id="feedInput" step="any" placeholder="Ange matning per skär" oninput="calculateInRealTime()">
+                        <div id="feedResult" class="result-display"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -102,10 +120,12 @@
         function saveCurrentTool() {
             const toolDiameterValue = document.getElementById('toolDiameter').value;
             const numberOfTeethValue = document.getElementById('numberOfTeeth').value;
-            const cuttingSpeedValue = document.getElementById('cuttingSpeed').value;
-            const feedPerToothValue = document.getElementById('feedPerTooth').value;
+            const speedInputValue = document.getElementById('speedInput').value;
+            const feedInputValue = document.getElementById('feedInput').value;
+            const speedMode = document.querySelector('input[name="speedMode"]:checked').value;
+            const feedMode = document.querySelector('input[name="feedMode"]:checked').value;
 
-            if (!toolDiameterValue || !numberOfTeethValue || !cuttingSpeedValue || !feedPerToothValue) {
+            if (!toolDiameterValue || !numberOfTeethValue || !speedInputValue || !feedInputValue) {
                 alert('Fyll i alla fält innan du sparar verktyget');
                 return;
             }
@@ -116,8 +136,10 @@
             const toolData = {
                 diameter: toolDiameterValue,
                 teeth: numberOfTeethValue,
-                cuttingSpeed: cuttingSpeedValue,
-                feedPerTooth: feedPerToothValue
+                speedInput: speedInputValue,
+                feedInput: feedInputValue,
+                speedMode: speedMode,
+                feedMode: feedMode
             };
 
             localStorage.setItem(`millingTool_${toolName}`, JSON.stringify(toolData));
@@ -127,10 +149,22 @@
         function loadSavedTool(toolName) {
             const toolData = JSON.parse(localStorage.getItem(`millingTool_${toolName}`));
             if (toolData) {
-                document.getElementById('toolDiameter').value = toolData.diameter;
-                document.getElementById('numberOfTeeth').value = toolData.teeth;
-                document.getElementById('cuttingSpeed').value = toolData.cuttingSpeed;
-                document.getElementById('feedPerTooth').value = toolData.feedPerTooth;
+                document.getElementById('toolDiameter').value = toolData.diameter || '';
+                document.getElementById('numberOfTeeth').value = toolData.teeth || '';
+                document.getElementById('speedInput').value = toolData.speedInput || '';
+                document.getElementById('feedInput').value = toolData.feedInput || '';
+                
+                if (toolData.speedMode) {
+                    document.getElementById(toolData.speedMode === 'cutting' ? 'speedModeCutting' : 'speedModeRpm').checked = true;
+                    handleSpeedModeChange();
+                }
+                
+                if (toolData.feedMode) {
+                    document.getElementById(toolData.feedMode === 'perTooth' ? 'feedModePerTooth' : 'feedModePerMinute').checked = true;
+                    handleFeedModeChange();
+                }
+                
+                calculateInRealTime();
             }
         }
 
@@ -159,65 +193,93 @@
             toolSelectElement.value = currentValue;
         }
 
-        function calculateMillingParameters() {
+        function handleSpeedModeChange() {
+            const speedMode = document.querySelector('input[name="speedMode"]:checked').value;
+            const speedInput = document.getElementById('speedInput');
+            
+            if (speedMode === 'cutting') {
+                speedInput.placeholder = 'Ange skärhastighet';
+            } else {
+                speedInput.placeholder = 'Ange varvtal';
+            }
+            
+            calculateInRealTime();
+        }
+
+        function handleFeedModeChange() {
+            const feedMode = document.querySelector('input[name="feedMode"]:checked').value;
+            const feedInput = document.getElementById('feedInput');
+            
+            if (feedMode === 'perTooth') {
+                feedInput.placeholder = 'Ange matning per skär';
+            } else {
+                feedInput.placeholder = 'Ange matning per minut';
+            }
+            
+            calculateInRealTime();
+        }
+
+        function calculateInRealTime() {
             const toolDiameterValue = parseFloat(document.getElementById('toolDiameter').value);
             const numberOfTeethValue = parseInt(document.getElementById('numberOfTeeth').value);
-            const cuttingSpeedValue = parseFloat(document.getElementById('cuttingSpeed').value);
-            const feedPerToothValue = parseFloat(document.getElementById('feedPerTooth').value);
-            const resultsElement = document.getElementById('results');
-
-            if (isNaN(toolDiameterValue) || isNaN(numberOfTeethValue) || isNaN(cuttingSpeedValue) || isNaN(feedPerToothValue)) {
-                resultsElement.textContent = 'Vänligen ange giltiga värden för alla fält';
-                resultsElement.className = 'results error';
+            const speedInputValue = parseFloat(document.getElementById('speedInput').value);
+            const feedInputValue = parseFloat(document.getElementById('feedInput').value);
+            const speedMode = document.querySelector('input[name="speedMode"]:checked').value;
+            const feedMode = document.querySelector('input[name="feedMode"]:checked').value;
+            
+            const speedResult = document.getElementById('speedResult');
+            const feedResult = document.getElementById('feedResult');
+            
+            speedResult.textContent = '';
+            feedResult.textContent = '';
+            
+            if (isNaN(toolDiameterValue) || toolDiameterValue <= 0 || 
+                isNaN(numberOfTeethValue) || numberOfTeethValue <= 0 ||
+                isNaN(speedInputValue) || speedInputValue <= 0) {
                 return;
             }
-
-            if (toolDiameterValue <= 0 || numberOfTeethValue <= 0 || cuttingSpeedValue <= 0 || feedPerToothValue <= 0) {
-                resultsElement.textContent = 'Alla värden måste vara större än noll';
-                resultsElement.className = 'results error';
-                return;
+            
+            let calculatedRotationsPerMinute;
+            
+            if (speedMode === 'cutting') {
+                calculatedRotationsPerMinute = (speedInputValue * 1000) / (Math.PI * toolDiameterValue);
+                speedResult.textContent = `${Math.round(calculatedRotationsPerMinute)} RPM`;
+            } else {
+                const calculatedCuttingSpeed = (speedInputValue * Math.PI * toolDiameterValue) / 1000;
+                speedResult.textContent = `${Math.round(calculatedCuttingSpeed * 10) / 10} m/min`;
+                calculatedRotationsPerMinute = speedInputValue;
             }
-
-            const rotationsPerMinute = (cuttingSpeedValue * 1000) / (Math.PI * toolDiameterValue);
-            const feedRatePerMinute = rotationsPerMinute * numberOfTeethValue * feedPerToothValue;
-            const feedRatePerRevolution = numberOfTeethValue * feedPerToothValue;
-
-            resultsElement.innerHTML = `
-                <div class="result-item">
-                    <span class="result-label">Varvtal (RPM):</span>
-                    <span class="result-value">${Math.round(rotationsPerMinute)}</span>
-                </div>
-                <div class="result-item">
-                    <span class="result-label">Matningshastighet (mm/min):</span>
-                    <span class="result-value">${Math.round(feedRatePerMinute)}</span>
-                </div>
-                <div class="result-item">
-                    <span class="result-label">Matning per varv (mm/varv):</span>
-                    <span class="result-value">${feedRatePerRevolution.toFixed(3)}</span>
-                </div>
-            `;
-            resultsElement.className = 'results';
+            
+            if (!isNaN(feedInputValue) && feedInputValue > 0) {
+                if (feedMode === 'perTooth') {
+                    const calculatedFeedRatePerMinute = calculatedRotationsPerMinute * numberOfTeethValue * feedInputValue;
+                    feedResult.textContent = `${Math.round(calculatedFeedRatePerMinute)} mm/min`;
+                } else {
+                    const calculatedFeedPerTooth = feedInputValue / (calculatedRotationsPerMinute * numberOfTeethValue);
+                    feedResult.textContent = `${Math.round(calculatedFeedPerTooth * 1000) / 1000} mm/skär`;
+                }
+            }
         }
 
         function clearInputs() {
             document.getElementById('toolSelect').value = '';
             document.getElementById('toolDiameter').value = '';
             document.getElementById('numberOfTeeth').value = '';
-            document.getElementById('cuttingSpeed').value = '';
-            document.getElementById('feedPerTooth').value = '';
+            document.getElementById('speedInput').value = '';
+            document.getElementById('feedInput').value = '';
+            document.getElementById('speedResult').textContent = '';
+            document.getElementById('feedResult').textContent = '';
             
-            const resultsElement = document.getElementById('results');
-            resultsElement.textContent = 'Ange värden och klicka Beräkna';
-            resultsElement.className = 'results';
+            document.getElementById('speedModeCutting').checked = true;
+            document.getElementById('feedModePerTooth').checked = true;
+            handleSpeedModeChange();
+            handleFeedModeChange();
             
             document.getElementById('toolDiameter').focus();
         }
 
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                calculateMillingParameters();
-            } else if (event.key === 'Escape') {
+            if (event.key === 'Escape') {
                 event.preventDefault();
                 clearInputs();
             }
