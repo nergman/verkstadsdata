@@ -1,0 +1,211 @@
+@import url('../style.css');
+
+:root {
+    --primary-color: #ff9500;
+    --primary-color-hover: #e68400;
+    --secondary-color: #a6a6a6;
+    --secondary-color-hover: #999;
+    --text-color: #ffffff;
+    --text-color-secondary: #000000;
+    --border-color: #666;
+    --border-color-light: #333;
+    --background-dark: #111;
+    --background-calculator: #1a1a1a;
+    
+    --spacing-xs: 3px;
+    --spacing-sm: 5px;
+    --spacing-md: 10px;
+    --spacing-lg: 15px;
+    --spacing-xl: 20px;
+    
+    --font-size-sm: 12px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    
+    --border-radius: 5px;
+}
+
+.milling-calculator {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+    background-color: var(--background-calculator);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+
+    input[type="number"] {
+        background-color: var(--background-dark);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        color: var(--text-color);
+        padding: var(--spacing-md);
+        font-size: var(--font-size-md);
+        width: 100%;
+        box-sizing: border-box;
+        
+        &:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 149, 0, 0.2);
+        }
+    }
+
+    label {
+        color: var(--text-color);
+        font-size: var(--font-size-md);
+        font-weight: bold;
+        margin-bottom: var(--spacing-xs);
+        display: block;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.milling-calculator__inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.milling-calculator__controls {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+.calculate-button {
+    flex: 1;
+    padding: var(--spacing-lg);
+    font-size: var(--font-size-lg);
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: var(--primary-color-hover);
+    }
+}
+
+.clear-button {
+    flex: 1;
+    padding: var(--spacing-lg);
+    font-size: var(--font-size-lg);
+    background-color: var(--secondary-color);
+    color: var(--text-color-secondary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: var(--secondary-color-hover);
+    }
+}
+
+.results {
+    padding: var(--spacing-lg);
+    background-color: var(--background-dark);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-size: var(--font-size-md);
+    text-align: center;
+
+    &.error {
+        background-color: rgba(220, 38, 38, 0.1);
+        border-color: #dc2626;
+        color: #fca5a5;
+    }
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color-light);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.result-label {
+    font-weight: bold;
+}
+
+.result-value {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.milling-calculator__material-guide {
+    background-color: var(--background-dark);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+
+    h3 {
+        color: var(--text-color);
+        margin: 0 0 var(--spacing-lg) 0;
+        font-size: var(--font-size-lg);
+    }
+}
+
+.material-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.material-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+
+    strong {
+        color: var(--text-color);
+    }
+
+    span {
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+}
+
+@media (max-width: 768px) {
+    .milling-calculator {
+        margin: var(--spacing-md);
+        padding: var(--spacing-lg);
+    }
+
+    .milling-calculator__inputs {
+        grid-template-columns: 1fr;
+    }
+
+    .milling-calculator__controls {
+        flex-direction: column;
+    }
+
+    .material-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .milling-calculator {
+        margin: var(--spacing-sm);
+        padding: var(--spacing-md);
+    }
+}
