@@ -196,11 +196,25 @@
         function handleSpeedModeChange() {
             const speedMode = document.querySelector('input[name="speedMode"]:checked').value;
             const speedInput = document.getElementById('speedInput');
+            const currentValue = parseFloat(speedInput.value);
+            const toolDiameterValue = parseFloat(document.getElementById('toolDiameter').value);
             
-            if (speedMode === 'cutting') {
-                speedInput.placeholder = 'Ange skärhastighet';
+            if (!isNaN(currentValue) && currentValue > 0 && !isNaN(toolDiameterValue) && toolDiameterValue > 0) {
+                if (speedMode === 'cutting') {
+                    const convertedCuttingSpeed = (currentValue * Math.PI * toolDiameterValue) / 1000;
+                    speedInput.value = Math.round(convertedCuttingSpeed * 10) / 10;
+                    speedInput.placeholder = 'Ange skärhastighet';
+                } else {
+                    const convertedRotationsPerMinute = (currentValue * 1000) / (Math.PI * toolDiameterValue);
+                    speedInput.value = Math.round(convertedRotationsPerMinute);
+                    speedInput.placeholder = 'Ange varvtal';
+                }
             } else {
-                speedInput.placeholder = 'Ange varvtal';
+                if (speedMode === 'cutting') {
+                    speedInput.placeholder = 'Ange skärhastighet';
+                } else {
+                    speedInput.placeholder = 'Ange varvtal';
+                }
             }
             
             calculateInRealTime();
@@ -209,11 +223,39 @@
         function handleFeedModeChange() {
             const feedMode = document.querySelector('input[name="feedMode"]:checked').value;
             const feedInput = document.getElementById('feedInput');
+            const currentValue = parseFloat(feedInput.value);
+            const toolDiameterValue = parseFloat(document.getElementById('toolDiameter').value);
+            const numberOfTeethValue = parseInt(document.getElementById('numberOfTeeth').value);
+            const speedInputValue = parseFloat(document.getElementById('speedInput').value);
+            const speedMode = document.querySelector('input[name="speedMode"]:checked').value;
             
-            if (feedMode === 'perTooth') {
-                feedInput.placeholder = 'Ange matning per skär';
+            if (!isNaN(currentValue) && currentValue > 0 && 
+                !isNaN(toolDiameterValue) && toolDiameterValue > 0 &&
+                !isNaN(numberOfTeethValue) && numberOfTeethValue > 0 &&
+                !isNaN(speedInputValue) && speedInputValue > 0) {
+                
+                let rotationsPerMinute;
+                if (speedMode === 'cutting') {
+                    rotationsPerMinute = (speedInputValue * 1000) / (Math.PI * toolDiameterValue);
+                } else {
+                    rotationsPerMinute = speedInputValue;
+                }
+                
+                if (feedMode === 'perTooth') {
+                    const convertedFeedPerTooth = currentValue / (rotationsPerMinute * numberOfTeethValue);
+                    feedInput.value = Math.round(convertedFeedPerTooth * 1000) / 1000;
+                    feedInput.placeholder = 'Ange matning per skär';
+                } else {
+                    const convertedFeedRatePerMinute = currentValue * rotationsPerMinute * numberOfTeethValue;
+                    feedInput.value = Math.round(convertedFeedRatePerMinute);
+                    feedInput.placeholder = 'Ange matning per minut';
+                }
             } else {
-                feedInput.placeholder = 'Ange matning per minut';
+                if (feedMode === 'perTooth') {
+                    feedInput.placeholder = 'Ange matning per skär';
+                } else {
+                    feedInput.placeholder = 'Ange matning per minut';
+                }
             }
             
             calculateInRealTime();
