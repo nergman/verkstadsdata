@@ -74,6 +74,76 @@ input[type="number"]::-webkit-inner-spin-button {
     grid-column: 1 / -1;
 }
 
+.tool-select-labels {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xs);
+}
+
+.tool-select-labels label {
+    color: var(--text-color);
+    font-size: var(--font-size-md);
+    font-weight: bold;
+    margin: 0;
+}
+
+.tool-select-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+    align-items: stretch;
+}
+
+.tool-select-with-clear {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: stretch;
+}
+
+.tool-select-with-clear select {
+    flex: 1;
+}
+
+.max-rpm-with-clear {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: stretch;
+}
+
+.max-rpm-with-clear input {
+    flex: 1;
+}
+
+.max-rpm-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.max-rpm-field label {
+    margin-bottom: var(--spacing-xs);
+}
+
+.clear-button {
+    padding: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    background-color: var(--secondary-color);
+    color: var(--text-color-secondary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    height: var(--input-height);
+    width: var(--input-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background-color: var(--secondary-color-hover);
+    }
+}
+
 .tool-diameter-group {
     grid-column: 1;
     grid-row: 2;
@@ -159,34 +229,6 @@ input[type="number"]::-webkit-inner-spin-button {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
-}
-
-.tool-select-row {
-    display: flex;
-    gap: var(--spacing-md);
-    align-items: stretch;
-}
-
-.tool-select-row select {
-    flex: 1;
-}
-
-.tool-select-row .clear-button {
-    flex: 0 0 auto;
-    padding: var(--spacing-md) var(--spacing-lg);
-    font-size: var(--font-size-md);
-    background-color: var(--secondary-color);
-    color: var(--text-color-secondary);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color 0.2s;
-    height: var(--input-height);
-    white-space: nowrap;
-
-    &:hover {
-        background-color: var(--secondary-color-hover);
-    }
 }
 
 .milling-calculator__material-guide {

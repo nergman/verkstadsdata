@@ -16,13 +16,21 @@
     <div class="milling-calculator">
         <div class="milling-calculator__inputs">
             <div class="input-group tool-select-group">
-                <label for="toolSelect">Verktyg</label>
+                <div class="tool-select-labels">
+                    <label for="toolSelect">Verktyg</label>
+                    <label for="maxRpm">Max RPM</label>
+                </div>
                 <div class="tool-select-row">
-                    <select id="toolSelect" onchange="handleToolSelection()">
-                        <option value="">Välj verktyg...</option>
-                        <option value="save">Spara verktyg...</option>
-                    </select>
-                    <button class="clear-button" onclick="clearInputs()">Rensa</button>
+                    <div class="tool-select-with-clear">
+                        <select id="toolSelect" onchange="handleToolSelection()">
+                            <option value="">Välj verktyg...</option>
+                            <option value="save">Spara verktyg...</option>
+                        </select>
+                    </div>
+                    <div class="max-rpm-with-clear">
+                        <input type="number" id="maxRpm" step="1" min="1" value="1400" placeholder="Max varvtal" oninput="handleMaxRpmChange()">
+                        <button class="clear-button" onclick="clearInputs()" title="Rensa">×</button>
+                    </div>
                 </div>
             </div>
 
@@ -120,13 +128,9 @@
         function saveCurrentTool() {
             const toolDiameterValue = document.getElementById('toolDiameter').value;
             const numberOfTeethValue = document.getElementById('numberOfTeeth').value;
-            const speedInputValue = document.getElementById('speedInput').value;
-            const feedInputValue = document.getElementById('feedInput').value;
-            const speedMode = document.querySelector('input[name="speedMode"]:checked').value;
-            const feedMode = document.querySelector('input[name="feedMode"]:checked').value;
 
-            if (!toolDiameterValue || !numberOfTeethValue || !speedInputValue || !feedInputValue) {
-                alert('Fyll i alla fält innan du sparar verktyget');
+            if (!toolDiameterValue || !numberOfTeethValue) {
+                alert('Fyll i verktygsdiameter och antal skär innan du sparar verktyget');
                 return;
             }
 
@@ -135,11 +139,7 @@
 
             const toolData = {
                 diameter: toolDiameterValue,
-                teeth: numberOfTeethValue,
-                speedInput: speedInputValue,
-                feedInput: feedInputValue,
-                speedMode: speedMode,
-                feedMode: feedMode
+                teeth: numberOfTeethValue
             };
 
             localStorage.setItem(`millingTool_${toolName}`, JSON.stringify(toolData));
@@ -151,18 +151,16 @@
             if (toolData) {
                 document.getElementById('toolDiameter').value = toolData.diameter || '';
                 document.getElementById('numberOfTeeth').value = toolData.teeth || '';
-                document.getElementById('speedInput').value = toolData.speedInput || '';
-                document.getElementById('feedInput').value = toolData.feedInput || '';
                 
-                if (toolData.speedMode) {
-                    document.getElementById(toolData.speedMode === 'cutting' ? 'speedModeCutting' : 'speedModeRpm').checked = true;
-                    handleSpeedModeChange();
-                }
+                document.getElementById('speedInput').value = '';
+                document.getElementById('feedInput').value = '';
+                document.getElementById('speedResult').textContent = '';
+                document.getElementById('feedResult').textContent = '';
                 
-                if (toolData.feedMode) {
-                    document.getElementById(toolData.feedMode === 'perTooth' ? 'feedModePerTooth' : 'feedModePerMinute').checked = true;
-                    handleFeedModeChange();
-                }
+                document.getElementById('speedModeCutting').checked = true;
+                document.getElementById('feedModePerTooth').checked = true;
+                handleSpeedModeChange();
+                handleFeedModeChange();
                 
                 calculateInRealTime();
             }
@@ -266,6 +264,7 @@
             const numberOfTeethValue = parseInt(document.getElementById('numberOfTeeth').value);
             const speedInputValue = parseFloat(document.getElementById('speedInput').value);
             const feedInputValue = parseFloat(document.getElementById('feedInput').value);
+            const maxRpmValue = parseFloat(document.getElementById('maxRpm').value);
             const speedMode = document.querySelector('input[name="speedMode"]:checked').value;
             const feedMode = document.querySelector('input[name="feedMode"]:checked').value;
             
@@ -282,29 +281,78 @@
             }
             
             let calculatedRotationsPerMinute;
+            const effectiveMaxRpm = maxRpmValue || 1400;
             
             if (speedMode === 'cutting') {
                 calculatedRotationsPerMinute = (speedInputValue * 1000) / (Math.PI * toolDiameterValue);
-                speedResult.textContent = `${Math.round(calculatedRotationsPerMinute)} RPM`;
+                const displayRpm = Math.round(calculatedRotationsPerMinute);
+                
+                if (calculatedRotationsPerMinute > effectiveMaxRpm) {
+                    speedResult.textContent = `RPM ${effectiveMaxRpm} (${displayRpm})`;
+                    speedResult.style.color = 'var(--warning-color, #ff6b35)';
+                } else {
+                    speedResult.textContent = `${displayRpm} RPM`;
+                    speedResult.style.color = 'var(--primary-color)';
+                }
             } else {
                 const calculatedCuttingSpeed = (speedInputValue * Math.PI * toolDiameterValue) / 1000;
                 speedResult.textContent = `${Math.round(calculatedCuttingSpeed * 10) / 10} m/min`;
+                speedResult.style.color = 'var(--primary-color)';
                 calculatedRotationsPerMinute = speedInputValue;
+                
+                if (speedInputValue > effectiveMaxRpm) {
+                    speedResult.style.color = 'var(--warning-color, #ff6b35)';
+                }
             }
             
             if (!isNaN(feedInputValue) && feedInputValue > 0) {
+                const actualRotationsPerMinute = Math.min(calculatedRotationsPerMinute, effectiveMaxRpm);
+                
                 if (feedMode === 'perTooth') {
-                    const calculatedFeedRatePerMinute = calculatedRotationsPerMinute * numberOfTeethValue * feedInputValue;
-                    feedResult.textContent = `${Math.round(calculatedFeedRatePerMinute)} mm/min`;
+                    const calculatedFeedRatePerMinute = actualRotationsPerMinute * numberOfTeethValue * feedInputValue;
+                    
+                    if (calculatedRotationsPerMinute > effectiveMaxRpm) {
+                        const theoreticalFeedRate = calculatedRotationsPerMinute * numberOfTeethValue * feedInputValue;
+                        feedResult.textContent = `${Math.round(calculatedFeedRatePerMinute)} mm/min (${Math.round(theoreticalFeedRate)})`;
+                        feedResult.style.color = 'var(--warning-color, #ff6b35)';
+                    } else {
+                        feedResult.textContent = `${Math.round(calculatedFeedRatePerMinute)} mm/min`;
+                        feedResult.style.color = 'var(--primary-color)';
+                    }
                 } else {
-                    const calculatedFeedPerTooth = feedInputValue / (calculatedRotationsPerMinute * numberOfTeethValue);
-                    feedResult.textContent = `${Math.round(calculatedFeedPerTooth * 1000) / 1000} mm/skär`;
+                    const calculatedFeedPerTooth = feedInputValue / (actualRotationsPerMinute * numberOfTeethValue);
+                    
+                    if (calculatedRotationsPerMinute > effectiveMaxRpm) {
+                        const theoreticalFeedPerTooth = feedInputValue / (calculatedRotationsPerMinute * numberOfTeethValue);
+                        feedResult.textContent = `${Math.round(calculatedFeedPerTooth * 1000) / 1000} mm/skär (${Math.round(theoreticalFeedPerTooth * 1000) / 1000})`;
+                        feedResult.style.color = 'var(--warning-color, #ff6b35)';
+                    } else {
+                        feedResult.textContent = `${Math.round(calculatedFeedPerTooth * 1000) / 1000} mm/skär`;
+                        feedResult.style.color = 'var(--primary-color)';
+                    }
                 }
+            }
+        }
+
+        function handleMaxRpmChange() {
+            const maxRpmValue = document.getElementById('maxRpm').value;
+            localStorage.setItem('millingCalculatorMaxRpm', maxRpmValue);
+            calculateInRealTime();
+        }
+
+        function loadMaxRpmFromStorage() {
+            const storedMaxRpm = localStorage.getItem('millingCalculatorMaxRpm');
+            if (storedMaxRpm) {
+                document.getElementById('maxRpm').value = storedMaxRpm;
             }
         }
 
         function clearInputs() {
             document.getElementById('toolSelect').value = '';
+            
+            const storedMaxRpm = localStorage.getItem('millingCalculatorMaxRpm') || '1400';
+            document.getElementById('maxRpm').value = storedMaxRpm;
+            
             document.getElementById('toolDiameter').value = '';
             document.getElementById('numberOfTeeth').value = '';
             document.getElementById('speedInput').value = '';
@@ -328,6 +376,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
+            loadMaxRpmFromStorage();
             updateToolSelectOptions();
             document.getElementById('toolDiameter').focus();
         });
