@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logga in - Verkstadsdata</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-form">
+            <h2>Logga in</h2>
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <label for="username">Användarnamn:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Lösenord:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="auth-btn primary">Logga in</button>
+            </form>
+            <p class="auth-link">Har du inget konto? <a href="/register">Registrera dig här</a></p>
+            <p class="auth-link"><a href="/">Tillbaka till startsidan</a></p>
+        </div>
+    </div>
+</body>
+</html>

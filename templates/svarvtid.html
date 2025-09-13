@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Svarvtidskalkylator</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/svarvtid.css">
 </head>
 <body>
     <div class="navigation">
-        <a href="../">← Tillbaka till huvudsidan</a>
+        <a href="/">← Tillbaka till huvudsidan</a>
+        {{if .User}}
+            <span class="user-info">Inloggad som {{.User.Username}}</span>
+        {{end}}
     </div>
 
     <h1>Svarvtidskalkylator</h1>

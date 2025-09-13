@@ -46,6 +46,125 @@ h1, h3, p {
     margin: 20px auto;
 }
 
+.header-with-auth {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.auth-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-welcome {
+    color: #333;
+    font-weight: bold;
+}
+
+.premium-badge {
+    background-color: #ff9500;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.auth-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.auth-btn:hover {
+    background-color: #0056b3;
+}
+
+.auth-btn.primary {
+    background-color: #ff9500;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+}
+
+.auth-btn.primary:hover {
+    background-color: #e68400;
+}
+
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.auth-form {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+.premium-required {
+    opacity: 0.6;
+    position: relative;
+}
+
+.premium-notice {
+    background-color: #ff9500;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+}
+
 .utilities-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

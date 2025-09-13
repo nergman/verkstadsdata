@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verkstadsdata - Utilities</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="landing-container">
+        <div class="header-with-auth">
+            <h1>verktygsdata.se</h1>
+            <div class="auth-section">
+                {{if .User}}
+                    <span class="user-welcome">Välkommen, {{.User.Username}}!</span>
+                    {{if .User.IsPremium}}
+                        <span class="premium-badge">Premium</span>
+                    {{end}}
+                    <form action="/logout" method="post" style="display: inline;">
+                        <button type="submit" class="auth-btn">Logga ut</button>
+                    </form>
+                {{else}}
+                    <a href="/login" class="auth-btn">Logga in</a>
+                    <a href="/register" class="auth-btn">Registrera</a>
+                {{end}}
+            </div>
+        </div>
+        
+        <p>Digitala verktyg för skärande bearbetning.</p>
+        
+        <div class="utilities-grid">
+            <div class="utility-card {{if not .User.IsPremium}}premium-required{{end}}">
+                <h3>Stångkalkylator</h3>
+                <p>Beräkna optimal stånglängd för skärning med hänsyn till materialförluster och skärparametrar.</p>
+                {{if .User.IsPremium}}
+                    <a href="/rodcalc" class="utility-link">Öppna kalkylator</a>
+                {{else}}
+                    <div class="premium-notice">Premium krävs</div>
+                {{end}}
+            </div>
+            
+            <div class="utility-card">
+                <h3>Svarvtidskalkylator</h3>
+                <p>Beräkna bearbetningstid för svarvoperationer baserat på dimensioner och maskinparametrar.</p>
+                <a href="/svarvtid" class="utility-link">Öppna kalkylator</a>
+            </div>
+
+            <div class="utility-card">
+                <h3>Fräshastighetskalkylatorn</h3>
+                <p>Beräkna varvtal och matning för fräsverktyg baserat på verktygsdiameter och material.</p>
+                <a href="/millspeed" class="utility-link">Öppna kalkylator</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
