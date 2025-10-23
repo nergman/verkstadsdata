@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Svetsningskalkylator</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Svetsningskalkylator</h1>
+        <form id="calculator-form">
+            <div class="materials-container">
+                <!-- Material 1 -->
+                <div class="material-group">
+                    <h2>Grundmaterial 1</h2>
+                    <fieldset>
+                        <legend>Förinställningar</legend>
+                        <label for="preset-1">Välj stålsort:</label>
+                        <select id="preset-1" class="preset-selector">
+                            <option value="">-- Välj en sort --</option>
+                            <option value="1672">1672 (S355)</option>
+                            <option value="1914">1914 (102Cr6)</option>
+                            <option value="2541">2541 (16MnCr5)</option>
+                            <option value="4301">4301 (304)</option>
+                            <option value="4401">4401 (316)</option>
+                            <option value="4404">4404 (316L)</option>
+                            <option value="4818">4818</option>
+                            <option value="4828">4828</option>
+                            <option value="4833">4833 (309)</option>
+                            <option value="4841">4841 (310)</option>
+                            <option value="4845">4845 (310S)</option>
+                            <option value="4854">4854 (254 SMO)</option>
+                            <option value="4872">4872</option>
+                            <option value="4876">4876 (Alloy 800)</option>
+                            <option value="4878">4878 (321H)</option>
+                            <option value="4886">4886 (Alloy 825)</option>
+                        </select>
+                    </fieldset>
+                    <fieldset class="element-inputs" data-material-id="1">
+                        <legend>Sammansättning</legend>
+                        <label for="nickel-1">Nickel (%Ni):</label>
+                        <input type="number" id="nickel-1" step="0.01" required>
+                        <label for="manganese-1">Mangan (%Mn):</label>
+                        <input type="number" id="manganese-1" step="0.01" required>
+                        <label for="carbon-1">Kol (%C):</label>
+                        <input type="number" id="carbon-1" step="0.01" required>
+                        <label for="nitrogen-1">Kväve (%N):</label>
+                        <input type="number" id="nitrogen-1" step="0.01" required>
+                        <label for="chromium-1">Krom (%Cr):</label>
+                        <input type="number" id="chromium-1" step="0.01" required>
+                        <label for="molybdenum-1">Molybden (%Mo):</label>
+                        <input type="number" id="molybdenum-1" step="0.01" required>
+                        <label for="silicon-1">Kisel (%Si):</label>
+                        <input type="number" id="silicon-1" step="0.01" required>
+                        <label for="niobium-1">Niob (%Nb):</label>
+                        <input type="number" id="niobium-1" step="0.01" required>
+                    </fieldset>
+                </div>
+
+                <!-- Material 2 -->
+                <div class="material-group">
+                    <h2>Grundmaterial 2</h2>
+                    <fieldset>
+                        <legend>Förinställningar</legend>
+                        <label for="preset-2">Välj stålsort:</label>
+                        <select id="preset-2" class="preset-selector">
+                            <option value="">-- Välj en sort --</option>
+                            <option value="1672">1672 (S355)</option>
+                            <option value="1914">1914 (102Cr6)</option>
+                            <option value="2541">2541 (16MnCr5)</option>
+                            <option value="4301">4301 (304)</option>
+                            <option value="4401">4401 (316)</option>
+                            <option value="4404">4404 (316L)</option>
+                            <option value="4818">4818</option>
+                            <option value="4828">4828</option>
+                            <option value="4833">4833 (309)</option>
+                            <option value="4841">4841 (310)</option>
+                            <option value="4845">4845 (310S)</option>
+                            <option value="4854">4854 (254 SMO)</option>
+                            <option value="4872">4872</option>
+                            <option value="4876">4876 (Alloy 800)</option>
+                            <option value="4878">4878 (321H)</option>
+                            <option value="4886">4886 (Alloy 825)</option>
+                        </select>
+                    </fieldset>
+                    <fieldset class="element-inputs" data-material-id="2">
+                        <legend>Sammansättning</legend>
+                        <label for="nickel-2">Nickel (%Ni):</label>
+                        <input type="number" id="nickel-2" step="0.01" required>
+                        <label for="manganese-2">Mangan (%Mn):</label>
+                        <input type="number" id="manganese-2" step="0.01" required>
+                        <label for="carbon-2">Kol (%C):</label>
+                        <input type="number" id="carbon-2" step="0.01" required>
+                        <label for="nitrogen-2">Kväve (%N):</label>
+                        <input type="number" id="nitrogen-2" step="0.01" required>
+                        <label for="chromium-2">Krom (%Cr):</label>
+                        <input type="number" id="chromium-2" step="0.01" required>
+                        <label for="molybdenum-2">Molybden (%Mo):</label>
+                        <input type="number" id="molybdenum-2" step="0.01" required>
+                        <label for="silicon-2">Kisel (%Si):</label>
+                        <input type="number" id="silicon-2" step="0.01" required>
+                        <label for="niobium-2">Niob (%Nb):</label>
+                        <input type="number" id="niobium-2" step="0.01" required>
+                    </fieldset>
+                </div>
+            </div>
+
+            <button type="button" id="calculate-button">Beräkna ekvivalenter</button>
+        </form>
+
+        <div id="results">
+            <h2>Resultat</h2>
+            <div id="result-points">
+                <!-- Results will be dynamically inserted here -->
+            </div>
+            <div id="recommendation">
+                <h3>Rekommendation för svetsgods</h3>
+                <p>För att uppnå en austenitisk struktur, sikta på ett svetsgods med följande ekvivalenter:</p>
+                <p id="filler-recommendation"><span></span></p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="schaeffler-diagram"></canvas>
+        </div>
+    </div>
+    <script src="js/main.js" defer></script>
+</body>
+</html>
