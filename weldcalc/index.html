@@ -6,6 +6,7 @@
     <title>Svetsningskalkylator</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -23,9 +24,13 @@
                             <option value="1672">1672 (S355)</option>
                             <option value="1914">1914 (102Cr6)</option>
                             <option value="2541">2541 (16MnCr5)</option>
+                            <option value="1.4006">1.4006 (410)</option>
+                            <option value="1.4021">1.4021 (420)</option>
+                            <option value="2205">2205 (Duplex)</option>
                             <option value="4301">4301 (304)</option>
                             <option value="4401">4401 (316)</option>
                             <option value="4404">4404 (316L)</option>
+                            <option value="4571">4571 (316Ti)</option>
                             <option value="4818">4818</option>
                             <option value="4828">4828</option>
                             <option value="4833">4833 (309)</option>
@@ -56,6 +61,10 @@
                         <input type="number" id="silicon-1" step="0.01" required>
                         <label for="niobium-1">Niob (%Nb):</label>
                         <input type="number" id="niobium-1" step="0.01" required>
+                        <label for="vanadium-1">Vanadin (%V):</label>
+                        <input type="number" id="vanadium-1" step="0.01" required>
+                        <label for="copper-1">Koppar (%Cu):</label>
+                        <input type="number" id="copper-1" step="0.01" required>
                     </fieldset>
                 </div>
 
@@ -70,9 +79,13 @@
                             <option value="1672">1672 (S355)</option>
                             <option value="1914">1914 (102Cr6)</option>
                             <option value="2541">2541 (16MnCr5)</option>
+                            <option value="1.4006">1.4006 (410)</option>
+                            <option value="1.4021">1.4021 (420)</option>
+                            <option value="2205">2205 (Duplex)</option>
                             <option value="4301">4301 (304)</option>
                             <option value="4401">4401 (316)</option>
                             <option value="4404">4404 (316L)</option>
+                            <option value="4571">4571 (316Ti)</option>
                             <option value="4818">4818</option>
                             <option value="4828">4828</option>
                             <option value="4833">4833 (309)</option>
@@ -103,6 +116,10 @@
                         <input type="number" id="silicon-2" step="0.01" required>
                         <label for="niobium-2">Niob (%Nb):</label>
                         <input type="number" id="niobium-2" step="0.01" required>
+                        <label for="vanadium-2">Vanadin (%V):</label>
+                        <input type="number" id="vanadium-2" step="0.01" required>
+                        <label for="copper-2">Koppar (%Cu):</label>
+                        <input type="number" id="copper-2" step="0.01" required>
                     </fieldset>
                 </div>
             </div>
@@ -117,8 +134,17 @@
             </div>
             <div id="recommendation">
                 <h3>Rekommendation för svetsgods</h3>
-                <p>För att uppnå en austenitisk struktur, sikta på ett svetsgods med följande ekvivalenter:</p>
-                <p id="filler-recommendation"><span></span></p>
+                <fieldset id="welding-process-selector">
+                    <legend>Välj svetsprocess</legend>
+                    <div>
+                        <label><input type="radio" name="welding-process" value="TIG" checked> TIG</label>
+                        <label><input type="radio" name="welding-process" value="MIG_MAG"> MIG/MAG</label>
+                        <label><input type="radio" name="welding-process" value="MMA"> MMA (Pinne)</label>
+                    </div>
+                </fieldset>
+                <div id="recommendation-content">
+                    <!-- Recommendation text will be inserted here -->
+                </div>
             </div>
         </div>
 
@@ -126,6 +152,6 @@
             <canvas id="schaeffler-diagram"></canvas>
         </div>
     </div>
-    <script src="js/main.js" defer></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
