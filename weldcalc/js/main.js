@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const steelGradeData = {
         "1672": { nickel: 0, manganese: 1.2, carbon: 0.18, nitrogen: 0, chromium: 0, molybdenum: 0, silicon: 0.4, niobium: 0, vanadium: 0.05, copper: 0.3 },
+        "Domex 355": { nickel: 0, manganese: 1.5, carbon: 0.12, nitrogen: 0, chromium: 0, molybdenum: 0, silicon: 0.3, niobium: 0.03, vanadium: 0, copper: 0 },
+        "Domex 420": { nickel: 0, manganese: 1.6, carbon: 0.16, nitrogen: 0, chromium: 0, molybdenum: 0, silicon: 0.4, niobium: 0.04, vanadium: 0, copper: 0 },
         "1914": { nickel: 0, manganese: 0.3, carbon: 1.0, nitrogen: 0, chromium: 1.5, molybdenum: 0, silicon: 0.25, niobium: 0, vanadium: 0, copper: 0 },
         "2541": { nickel: 0, manganese: 1.15, carbon: 0.16, nitrogen: 0, chromium: 0.95, molybdenum: 0, silicon: 0.2, niobium: 0, vanadium: 0, copper: 0 },
         "1.4006": { nickel: 0.5, manganese: 0.8, carbon: 0.12, nitrogen: 0, chromium: 12.5, molybdenum: 0, silicon: 0.5, niobium: 0, vanadium: 0, copper: 0 }, // 410
